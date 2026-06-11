@@ -1,0 +1,33 @@
+services:
+  # ── Backend (Node/Express API) ─────────────────────────────────────────────
+  - type: web
+    name: lockin-backend
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false          # set in Render dashboard
+      - key: JWT_SECRET
+        sync: false          # set in Render dashboard
+      - key: FRONTEND_URL
+        value: https://lockin-frontend.onrender.com
+    healthCheckPath: /health
+
+  # ── Frontend (Vite static site) ────────────────────────────────────────────
+  - type: web
+    name: lockin-frontend
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://lockin-backend.onrender.com
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
