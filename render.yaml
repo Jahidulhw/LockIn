@@ -1,5 +1,5 @@
 services:
-  # ── Backend (Node/Express API) ─────────────────────────────────────────────
+  # ── Backend — Node/Express API ────────────────────────────────────────────
   - type: web
     name: lockin-backend
     runtime: node
@@ -9,15 +9,17 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      - key: PORT
+        value: 5001
       - key: MONGODB_URI
-        sync: false          # set in Render dashboard
+        sync: false        # paste your Atlas URI in the Render dashboard
       - key: JWT_SECRET
-        sync: false          # set in Render dashboard
+        sync: false        # paste a random secret in the Render dashboard
       - key: FRONTEND_URL
         value: https://lockin-frontend.onrender.com
     healthCheckPath: /health
 
-  # ── Frontend (Vite static site) ────────────────────────────────────────────
+  # ── Frontend — Vite static site ───────────────────────────────────────────
   - type: web
     name: lockin-frontend
     runtime: static
