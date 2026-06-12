@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 import { resetChallenge } from '../api/client';
+import Header from '../components/Header';
 
 function getDayIndex(startDateStr) {
   const start = new Date(startDateStr + 'T00:00:00');
@@ -82,12 +83,13 @@ export default function Home() {
   }
 
   if (loading) {
-    return <div className="page"><div className="loading-wrap"><div className="spinner" /></div></div>;
+    return <div className="page home-page"><Header /><div className="loading-wrap"><div className="spinner" /></div></div>;
   }
 
   if (error) {
     return (
-      <div className="page">
+      <div className="page home-page">
+        <Header />
         <div className="empty-state">
           <div className="empty-state-icon">😵</div>
           <div className="empty-state-text">can't reach the server<br />make sure the backend is running</div>
@@ -100,6 +102,7 @@ export default function Home() {
   if (!activeChallenge) {
     return (
       <div className="page home-page">
+        <Header />
         <div className="home-welcome">
           <div className="home-welcome-greeting">{getGreeting()}</div>
         </div>
@@ -129,6 +132,7 @@ export default function Home() {
 
   return (
     <div className="page home-page">
+      <Header />
 
       {/* greeting */}
       <div className="home-welcome">

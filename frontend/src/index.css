@@ -230,7 +230,7 @@ body {
 
 /* ── Page Header ── */
 .page-header {
-  padding: 14px 16px;
+  padding: calc(var(--sat) + 14px) 16px 14px;
   background: rgba(10, 10, 10, 0.94);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -238,7 +238,6 @@ body {
   position: sticky;
   top: 0;
   z-index: 10;
-  margin-top: calc(var(--sat) + 52px);
 }
 
 .page-title {

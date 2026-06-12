@@ -2,7 +2,6 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AppProvider } from './context/AppContext';
 import NavBar from './components/NavBar';
-import Header from './components/Header';
 import Home from './pages/Home';
 import DailyChecklist from './pages/DailyChecklist';
 import Challenges from './pages/Challenges';
@@ -20,7 +19,6 @@ function ProtectedApp() {
   return (
     <AppProvider>
       <div className="app">
-        <Header />
         <Routes>
           <Route path="/"               element={<Home />} />
           <Route path="/checklist"      element={<DailyChecklist />} />
