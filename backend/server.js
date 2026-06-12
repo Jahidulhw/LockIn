@@ -14,6 +14,7 @@ const PORT = process.env.PORT || 5001;
 const allowedOrigins = [
   'http://localhost:3002',
   'http://localhost:5173',
+  'https://lockin-frontend-i418.onrender.com',
   ...(process.env.FRONTEND_URL
     ? process.env.FRONTEND_URL.split(',').map((o) => o.trim())
     : [])
