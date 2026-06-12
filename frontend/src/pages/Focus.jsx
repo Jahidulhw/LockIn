@@ -430,7 +430,6 @@ export default function Focus() {
                 onChange={(e) => setActivity(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleStart()}
                 maxLength={50}
-                autoFocus
               />
               <p className="focus-time-label">set your goal</p>
               <div className="goal-preset-row">
