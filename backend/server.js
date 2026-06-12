@@ -11,9 +11,13 @@ const authRoutes = require('./routes/auth');
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-const allowedOrigins = process.env.FRONTEND_URL
-  ? process.env.FRONTEND_URL.split(',').map((o) => o.trim())
-  : ['http://localhost:3002', 'http://localhost:5173'];
+const allowedOrigins = [
+  'http://localhost:3002',
+  'http://localhost:5173',
+  ...(process.env.FRONTEND_URL
+    ? process.env.FRONTEND_URL.split(',').map((o) => o.trim())
+    : [])
+];
 
 app.use(cors({
   origin: (origin, cb) => {

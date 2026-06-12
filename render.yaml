@@ -16,7 +16,7 @@ services:
       - key: JWT_SECRET
         sync: false        # paste a random secret in the Render dashboard
       - key: FRONTEND_URL
-        value: https://lockin-frontend.onrender.com
+        value: https://lockin-frontend-i418.onrender.com
     healthCheckPath: /health
 
   # ── Frontend — Vite static site ───────────────────────────────────────────
