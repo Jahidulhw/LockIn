@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Background gradient: deep dark purple -->
+    <linearGradient id="bg" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0d001f"/>
+      <stop offset="100%" stop-color="#1e054e"/>
+    </linearGradient>
+    <!-- Radial glow in center -->
+    <radialGradient id="glow" cx="256" cy="310" r="210" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#5b21b6" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#5b21b6" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Lock gradient: light lavender → deep violet -->
+    <linearGradient id="lockGrad" x1="256" y1="144" x2="256" y2="465" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#f5f3ff"/>
+      <stop offset="42%" stop-color="#a78bfa"/>
+      <stop offset="100%" stop-color="#4c1d95"/>
+    </linearGradient>
+    <!-- Drop shadow for lock group -->
+    <filter id="shadow" x="-25%" y="-25%" width="150%" height="150%">
+      <feDropShadow dx="0" dy="10" stdDeviation="18" flood-color="#000000" flood-opacity="0.55"/>
+    </filter>
+    <!-- Outer flame: deep red → orange → amber -->
+    <linearGradient id="flameOuter" x1="256" y1="448" x2="256" y2="270" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#7f1d1d"/>
+      <stop offset="28%" stop-color="#c2410c"/>
+      <stop offset="62%" stop-color="#d97706"/>
+      <stop offset="100%" stop-color="#fbbf24"/>
+    </linearGradient>
+    <!-- Inner flame core: golden → near-white -->
+    <linearGradient id="flameInner" x1="256" y1="432" x2="256" y2="294" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#fcd34d"/>
+      <stop offset="100%" stop-color="#fefce8"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="110" fill="url(#bg)"/>
+  <rect width="512" height="512" rx="110" fill="url(#glow)"/>
+
+  <!-- Lock group with drop shadow -->
+  <g filter="url(#shadow)">
+    <!-- Shackle arch: M start → line up left side → arc over top → line down right side -->
+    <path d="M 196 275 L 196 210 A 60 66 0 0 0 316 210 L 316 275"
+          fill="none" stroke="url(#lockGrad)" stroke-width="40" stroke-linecap="round"/>
+    <!-- Lock body -->
+    <rect x="140" y="255" width="232" height="210" rx="34" fill="url(#lockGrad)"/>
+  </g>
+
+  <!-- Subtle shine on lock body top-left for depth -->
+  <path d="M 140 289 C 140 270 156 255 175 255 L 256 255 L 256 330 C 200 330 140 315 140 289 Z"
+        fill="white" opacity="0.07"/>
+
+  <!-- Soft flame glow halo (orange wash inside lock) -->
+  <ellipse cx="256" cy="382" rx="72" ry="82" fill="#f97316" opacity="0.18"/>
+
+  <!-- Outer flame -->
+  <path d="M 256 448
+           C 218 448 192 422 192 390
+           C 192 362 208 338 224 314
+           C 230 304 231 290 226 280
+           C 238 288 244 304 241 322
+           C 247 305 249 285 245 270
+           C 258 282 264 304 260 326
+           C 267 308 268 288 263 274
+           C 279 290 288 316 286 342
+           C 291 324 290 304 283 290
+           C 301 308 308 336 308 370
+           C 311 352 309 330 302 316
+           C 322 336 320 368 320 390
+           C 320 422 294 448 256 448 Z"
+        fill="url(#flameOuter)"/>
+
+  <!-- Inner flame core (bright teardrop) -->
+  <path d="M 256 432
+           C 234 432 220 410 220 384
+           C 220 350 240 316 256 294
+           C 272 316 292 350 292 384
+           C 292 410 278 432 256 432 Z"
+        fill="url(#flameInner)" opacity="0.88"/>
+</svg>
