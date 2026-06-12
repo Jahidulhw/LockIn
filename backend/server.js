@@ -1,7 +1,10 @@
 require('dotenv').config();
 const express = require('express');
-const mongoose = require('mongoose');
 const cors = require('cors');
+
+// Initialize Firebase before importing routes
+require('./config/firebase');
+
 const challengeRoutes = require('./routes/challenges');
 const authRoutes = require('./routes/auth');
 
@@ -14,7 +17,6 @@ const allowedOrigins = process.env.FRONTEND_URL
 
 app.use(cors({
   origin: (origin, cb) => {
-    // allow server-to-server / curl (no origin) and listed origins
     if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
     cb(new Error(`CORS: ${origin} not allowed`));
   },
@@ -27,18 +29,4 @@ app.use('/api/challenges', challengeRoutes);
 
 app.get('/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 
-if (!process.env.MONGODB_URI) {
-  console.error('MONGODB_URI environment variable is not set');
-  process.exit(1);
-}
-
-mongoose
-  .connect(process.env.MONGODB_URI)
-  .then(() => {
-    console.log('Connected to MongoDB Atlas');
-    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-  })
-  .catch((err) => {
-    console.error('MongoDB connection error:', err.message);
-    process.exit(1);
-  });
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

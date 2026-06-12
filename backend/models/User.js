@@ -1,30 +1,26 @@
-const mongoose = require('mongoose');
+const db = require('../config/firebase');
 const bcrypt = require('bcryptjs');
 
-const UserSchema = new mongoose.Schema(
-  {
-    username: {
-      type: String,
-      required: true,
-      unique: true,
-      trim: true,
-      lowercase: true,
-      minlength: 2,
-      maxlength: 30
-    },
-    password: { type: String, required: true }
-  },
-  { timestamps: true }
-);
+const USERS = db.collection('users');
 
-UserSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
-  this.password = await bcrypt.hash(this.password, 12);
-  next();
-});
+async function createUser(username, password) {
+  const hash = await bcrypt.hash(password, 12);
+  await USERS.doc(username).set({
+    username,
+    password: hash,
+    createdAt: new Date().toISOString()
+  });
+  return { _id: username, username };
+}
 
-UserSchema.methods.comparePassword = function (plain) {
-  return bcrypt.compare(plain, this.password);
-};
+async function findByUsername(username) {
+  const doc = await USERS.doc(username).get();
+  if (!doc.exists) return null;
+  return { _id: doc.id, ...doc.data() };
+}
 
-module.exports = mongoose.model('User', UserSchema);
+async function comparePassword(plaintext, hash) {
+  return bcrypt.compare(plaintext, hash);
+}
+
+module.exports = { createUser, findByUsername, comparePassword };

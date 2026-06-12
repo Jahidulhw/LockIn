@@ -1,9 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const Challenge = require('../models/Challenge');
+const db = require('../config/firebase');
 const auth = require('../middleware/auth');
 
 router.use(auth);
+
+const CHALLENGES = db.collection('challenges');
 
 function generateId() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
@@ -13,10 +15,31 @@ function toDateStr(date) {
   return date.toISOString().split('T')[0];
 }
 
+function computeEndDate(startDate) {
+  const d = new Date(startDate);
+  d.setDate(d.getDate() + 29);
+  return toDateStr(d);
+}
+
+function docToObj(doc) {
+  return { _id: doc.id, ...doc.data() };
+}
+
+async function getOwned(docId, userId) {
+  const doc = await CHALLENGES.doc(docId).get();
+  if (!doc.exists) return null;
+  const data = doc.data();
+  if (data.userId !== userId) return null;
+  return { doc, obj: docToObj(doc) };
+}
+
 // GET /api/challenges
 router.get('/', async (req, res) => {
   try {
-    const challenges = await Challenge.find({ userId: req.user.id }).sort({ createdAt: -1 });
+    const snap = await CHALLENGES.where('userId', '==', req.user.id).get();
+    const challenges = snap.docs
+      .map(docToObj)
+      .sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
     res.json(challenges);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -26,9 +49,9 @@ router.get('/', async (req, res) => {
 // GET /api/challenges/:id
 router.get('/:id', async (req, res) => {
   try {
-    const challenge = await Challenge.findOne({ _id: req.params.id, userId: req.user.id });
-    if (!challenge) return res.status(404).json({ error: 'Challenge not found' });
-    res.json(challenge);
+    const owned = await getOwned(req.params.id, req.user.id);
+    if (!owned) return res.status(404).json({ error: 'Challenge not found' });
+    res.json(owned.obj);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -38,15 +61,27 @@ router.get('/:id', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const { name, startDate, habits = [] } = req.body;
+    if (!name || !startDate) {
+      return res.status(400).json({ error: 'name and startDate are required' });
+    }
     const processedHabits = habits.map((h) => ({
       id: h.id || generateId(),
       name: h.name,
-      target: h.target || true,
+      target: h.target !== undefined ? h.target : true,
       unit: h.unit || ''
     }));
-    const challenge = new Challenge({ userId: req.user.id, name, startDate, habits: processedHabits });
-    await challenge.save();
-    res.status(201).json(challenge);
+    const data = {
+      userId: req.user.id,
+      name,
+      startDate,
+      endDate: computeEndDate(startDate),
+      habits: processedHabits,
+      completions: [],
+      notes: [],
+      createdAt: new Date().toISOString()
+    };
+    const ref = await CHALLENGES.add(data);
+    res.status(201).json({ _id: ref.id, ...data });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -55,8 +90,9 @@ router.post('/', async (req, res) => {
 // DELETE /api/challenges/:id
 router.delete('/:id', async (req, res) => {
   try {
-    const challenge = await Challenge.findOneAndDelete({ _id: req.params.id, userId: req.user.id });
-    if (!challenge) return res.status(404).json({ error: 'Challenge not found' });
+    const owned = await getOwned(req.params.id, req.user.id);
+    if (!owned) return res.status(404).json({ error: 'Challenge not found' });
+    await CHALLENGES.doc(req.params.id).delete();
     res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -66,13 +102,13 @@ router.delete('/:id', async (req, res) => {
 // PUT /api/challenges/:id
 router.put('/:id', async (req, res) => {
   try {
-    const challenge = await Challenge.findOneAndUpdate(
-      { _id: req.params.id, userId: req.user.id },
-      req.body,
-      { new: true, runValidators: true }
-    );
-    if (!challenge) return res.status(404).json({ error: 'Challenge not found' });
-    res.json(challenge);
+    const owned = await getOwned(req.params.id, req.user.id);
+    if (!owned) return res.status(404).json({ error: 'Challenge not found' });
+    const { userId, createdAt, ...updates } = req.body;
+    if (updates.startDate) updates.endDate = computeEndDate(updates.startDate);
+    await CHALLENGES.doc(req.params.id).update(updates);
+    const updated = await CHALLENGES.doc(req.params.id).get();
+    res.json(docToObj(updated));
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -84,26 +120,31 @@ router.post('/:id/habits/:habitId/complete', async (req, res) => {
     const { date } = req.body;
     if (!date) return res.status(400).json({ error: 'date is required' });
 
-    const challenge = await Challenge.findOne({ _id: req.params.id, userId: req.user.id });
-    if (!challenge) return res.status(404).json({ error: 'Challenge not found' });
+    const owned = await getOwned(req.params.id, req.user.id);
+    if (!owned) return res.status(404).json({ error: 'Challenge not found' });
 
-    const habitExists = challenge.habits.some((h) => h.id === req.params.habitId);
+    const { obj } = owned;
+    const habitExists = obj.habits.some((h) => h.id === req.params.habitId);
     if (!habitExists) return res.status(404).json({ error: 'Habit not found' });
 
-    let dayEntry = challenge.completions.find((c) => c.date === date);
-    if (!dayEntry) {
-      challenge.completions.push({ date, habits: [{ habitId: req.params.habitId, completed: true }] });
+    const completions = [...(obj.completions || [])];
+    const dayIdx = completions.findIndex((c) => c.date === date);
+
+    if (dayIdx === -1) {
+      completions.push({ date, habits: [{ habitId: req.params.habitId, completed: true }] });
     } else {
-      const habitEntry = dayEntry.habits.find((h) => h.habitId === req.params.habitId);
-      if (!habitEntry) {
-        dayEntry.habits.push({ habitId: req.params.habitId, completed: true });
+      const day = { ...completions[dayIdx], habits: [...completions[dayIdx].habits] };
+      const habitIdx = day.habits.findIndex((h) => h.habitId === req.params.habitId);
+      if (habitIdx === -1) {
+        day.habits.push({ habitId: req.params.habitId, completed: true });
       } else {
-        habitEntry.completed = !habitEntry.completed;
+        day.habits[habitIdx] = { ...day.habits[habitIdx], completed: !day.habits[habitIdx].completed };
       }
+      completions[dayIdx] = day;
     }
 
-    await challenge.save();
-    res.json(challenge);
+    await CHALLENGES.doc(req.params.id).update({ completions });
+    res.json({ ...obj, completions });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -112,18 +153,19 @@ router.post('/:id/habits/:habitId/complete', async (req, res) => {
 // GET /api/challenges/:id/progress
 router.get('/:id/progress', async (req, res) => {
   try {
-    const challenge = await Challenge.findOne({ _id: req.params.id, userId: req.user.id });
-    if (!challenge) return res.status(404).json({ error: 'Challenge not found' });
+    const owned = await getOwned(req.params.id, req.user.id);
+    if (!owned) return res.status(404).json({ error: 'Challenge not found' });
 
-    const startDate = new Date(challenge.startDate);
-    const totalHabits = challenge.habits.length;
+    const { obj } = owned;
+    const startDate = new Date(obj.startDate);
+    const totalHabits = obj.habits.length;
     const progress = [];
 
     for (let i = 0; i < 30; i++) {
       const date = new Date(startDate);
       date.setDate(date.getDate() + i);
       const dateStr = toDateStr(date);
-      const dayEntry = challenge.completions.find((c) => c.date === dateStr);
+      const dayEntry = (obj.completions || []).find((c) => c.date === dateStr);
       const completedCount = dayEntry ? dayEntry.habits.filter((h) => h.completed).length : 0;
       progress.push({
         day: i + 1,
@@ -143,13 +185,14 @@ router.get('/:id/progress', async (req, res) => {
 // GET /api/challenges/:id/analytics
 router.get('/:id/analytics', async (req, res) => {
   try {
-    const challenge = await Challenge.findOne({ _id: req.params.id, userId: req.user.id });
-    if (!challenge) return res.status(404).json({ error: 'Challenge not found' });
+    const owned = await getOwned(req.params.id, req.user.id);
+    if (!owned) return res.status(404).json({ error: 'Challenge not found' });
 
-    const startDate = new Date(challenge.startDate);
+    const { obj } = owned;
+    const startDate = new Date(obj.startDate);
     const today = new Date();
     today.setHours(23, 59, 59, 999);
-    const totalHabits = challenge.habits.length;
+    const totalHabits = obj.habits.length;
 
     const dailyHistory = [];
     for (let i = 0; i < 30; i++) {
@@ -157,7 +200,7 @@ router.get('/:id/analytics', async (req, res) => {
       date.setDate(date.getDate() + i);
       const dateStr = toDateStr(date);
       const isPast = date <= today;
-      const dayEntry = challenge.completions.find((c) => c.date === dateStr);
+      const dayEntry = (obj.completions || []).find((c) => c.date === dateStr);
       const completedCount = dayEntry ? dayEntry.habits.filter((h) => h.completed).length : 0;
       dailyHistory.push({
         day: i + 1,
@@ -169,13 +212,13 @@ router.get('/:id/analytics', async (req, res) => {
       });
     }
 
-    const habitStats = challenge.habits.map((habit) => {
+    const habitStats = obj.habits.map((habit) => {
       let totalCompleted = 0;
       let eligibleDays = 0;
       dailyHistory.forEach((day) => {
         if (day.isPast) {
           eligibleDays++;
-          const dayEntry = challenge.completions.find((c) => c.date === day.date);
+          const dayEntry = (obj.completions || []).find((c) => c.date === day.date);
           if (dayEntry) {
             const habitEntry = dayEntry.habits.find((h) => h.habitId === habit.id);
             if (habitEntry?.completed) totalCompleted++;
@@ -194,7 +237,7 @@ router.get('/:id/analytics', async (req, res) => {
     });
 
     res.json({
-      challenge: { name: challenge.name, startDate: challenge.startDate, endDate: challenge.endDate },
+      challenge: { name: obj.name, startDate: obj.startDate, endDate: obj.endDate },
       dailyHistory,
       habitStats: [...habitStats].sort((a, b) => b.completionRate - a.completionRate)
     });
@@ -203,16 +246,23 @@ router.get('/:id/analytics', async (req, res) => {
   }
 });
 
-// POST /api/challenges/:id/habits  (add a habit to an existing challenge)
+// POST /api/challenges/:id/habits  (add habit to existing challenge)
 router.post('/:id/habits', async (req, res) => {
   try {
     const { name, target, unit } = req.body;
     if (!name) return res.status(400).json({ error: 'name is required' });
-    const challenge = await Challenge.findOne({ _id: req.params.id, userId: req.user.id });
-    if (!challenge) return res.status(404).json({ error: 'Challenge not found' });
-    challenge.habits.push({ id: generateId(), name: name.trim(), target: target || true, unit: unit || '' });
-    await challenge.save();
-    res.json(challenge);
+
+    const owned = await getOwned(req.params.id, req.user.id);
+    if (!owned) return res.status(404).json({ error: 'Challenge not found' });
+
+    const habits = [...owned.obj.habits, {
+      id: generateId(),
+      name: name.trim(),
+      target: target !== undefined ? target : true,
+      unit: unit || ''
+    }];
+    await CHALLENGES.doc(req.params.id).update({ habits });
+    res.json({ ...owned.obj, habits });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -221,13 +271,12 @@ router.post('/:id/habits', async (req, res) => {
 // DELETE /api/challenges/:id/habits/:habitId
 router.delete('/:id/habits/:habitId', async (req, res) => {
   try {
-    const challenge = await Challenge.findOneAndUpdate(
-      { _id: req.params.id, userId: req.user.id },
-      { $pull: { habits: { id: req.params.habitId } } },
-      { new: true }
-    );
-    if (!challenge) return res.status(404).json({ error: 'Challenge not found' });
-    res.json(challenge);
+    const owned = await getOwned(req.params.id, req.user.id);
+    if (!owned) return res.status(404).json({ error: 'Challenge not found' });
+
+    const habits = owned.obj.habits.filter((h) => h.id !== req.params.habitId);
+    await CHALLENGES.doc(req.params.id).update({ habits });
+    res.json({ ...owned.obj, habits });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -239,22 +288,25 @@ router.post('/:id/notes', async (req, res) => {
     const { date, text } = req.body;
     if (!date) return res.status(400).json({ error: 'date is required' });
 
-    const challenge = await Challenge.findOne({ _id: req.params.id, userId: req.user.id });
-    if (!challenge) return res.status(404).json({ error: 'Challenge not found' });
+    const owned = await getOwned(req.params.id, req.user.id);
+    if (!owned) return res.status(404).json({ error: 'Challenge not found' });
 
-    const existing = challenge.notes.find((n) => n.date === date);
+    let notes = [...(owned.obj.notes || [])];
     const trimmed = (text || '').trim();
 
     if (!trimmed) {
-      challenge.notes = challenge.notes.filter((n) => n.date !== date);
-    } else if (existing) {
-      existing.text = trimmed;
+      notes = notes.filter((n) => n.date !== date);
     } else {
-      challenge.notes.push({ date, text: trimmed });
+      const idx = notes.findIndex((n) => n.date === date);
+      if (idx === -1) {
+        notes.push({ date, text: trimmed });
+      } else {
+        notes[idx] = { date, text: trimmed };
+      }
     }
 
-    await challenge.save();
-    res.json(challenge);
+    await CHALLENGES.doc(req.params.id).update({ notes });
+    res.json({ ...owned.obj, notes });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -263,13 +315,11 @@ router.post('/:id/notes', async (req, res) => {
 // POST /api/challenges/:id/reset
 router.post('/:id/reset', async (req, res) => {
   try {
-    const challenge = await Challenge.findOneAndUpdate(
-      { _id: req.params.id, userId: req.user.id },
-      { $set: { completions: [] } },
-      { new: true }
-    );
-    if (!challenge) return res.status(404).json({ error: 'Challenge not found' });
-    res.json(challenge);
+    const owned = await getOwned(req.params.id, req.user.id);
+    if (!owned) return res.status(404).json({ error: 'Challenge not found' });
+
+    await CHALLENGES.doc(req.params.id).update({ completions: [] });
+    res.json({ ...owned.obj, completions: [] });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
