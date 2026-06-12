@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 import { resetChallenge } from '../api/client';
 import Header from '../components/Header';
+import CelebrationOverlay from '../components/CelebrationOverlay';
+import { triggerCelebration } from '../utils/celebration';
 
 function getDayIndex(startDateStr) {
   const start = new Date(startDateStr + 'T00:00:00');
@@ -66,8 +68,23 @@ export default function Home() {
   const { activeChallenge, loading, error, reload } = useApp();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [showResetModal, setShowResetModal] = useState(false);
-  const [resetting, setResetting]           = useState(false);
+  const [showResetModal, setShowResetModal]     = useState(false);
+  const [resetting, setResetting]               = useState(false);
+  const [showCelebration, setShowCelebration]   = useState(false);
+
+  // Fire celebration once when challenge day 30 is fully complete
+  useEffect(() => {
+    if (!activeChallenge) return;
+    const day = getDayIndex(activeChallenge.startDate);
+    if (day !== 30) return;
+    const { pct } = getTodayStats(activeChallenge);
+    if (pct !== 100) return;
+    const key = `lockin_celebrated_${activeChallenge._id}`;
+    if (localStorage.getItem(key)) return;
+    localStorage.setItem(key, '1');
+    setShowCelebration(true);
+    triggerCelebration();
+  }, [activeChallenge]);
 
   async function handleReset() {
     setResetting(true);
@@ -242,6 +259,11 @@ export default function Home() {
           reset progress
         </button>
       </div>
+
+      {/* celebration overlay — fires once on 30-day completion */}
+      {showCelebration && (
+        <CelebrationOverlay onClose={() => setShowCelebration(false)} />
+      )}
 
       {/* reset modal */}
       {showResetModal && (
