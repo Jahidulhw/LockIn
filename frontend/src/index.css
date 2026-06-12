@@ -545,22 +545,9 @@ body {
 
 /* ── Home Page (redesigned) ── */
 
+/* home-page inherits all scroll behaviour from .page;
+   only override the bottom padding for the taller nav clearance */
 .home-page {
-  padding-bottom: 0;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.home-fixed-top {
-  flex-shrink: 0;
-}
-
-.home-scroll-area {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
   padding-bottom: calc(80px + var(--sab));
 }
 
