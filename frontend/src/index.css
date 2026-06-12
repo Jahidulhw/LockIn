@@ -94,9 +94,71 @@ body {
   overflow-x: hidden;
 }
 
+/* ── Fixed App Header ── */
+.app-header {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 428px;
+  z-index: 200;
+  background: rgba(10, 10, 10, 0.94);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid var(--border);
+  padding-top: var(--sat);
+}
+.app-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  height: 52px;
+}
+.app-header-username {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.03em;
+}
+.app-header-avatar-wrap {
+  position: relative;
+}
+.app-header-avatar {
+  width: 36px;
+  height: 36px;
+  min-height: unset;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7c3aed, #a78bfa);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform .15s, opacity .15s;
+}
+.app-header-avatar:hover  { opacity: .85; }
+.app-header-avatar:active { transform: scale(.94); }
+.app-header-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 16px;
+  padding: 8px;
+  min-width: 180px;
+  box-shadow: 0 12px 40px rgba(0,0,0,.5);
+  z-index: 300;
+}
+
 .page {
   flex: 1;
-  padding: 0 0 calc(72px + var(--sab));
+  padding: calc(var(--sat) + 52px) 0 calc(72px + var(--sab));
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
@@ -169,7 +231,7 @@ body {
 
 /* ── Page Header ── */
 .page-header {
-  padding: calc(var(--sat) + 18px) 16px 14px 16px;
+  padding: 14px 16px;
   background: rgba(10, 10, 10, 0.94);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -504,7 +566,7 @@ body {
 
 /* greeting */
 .home-welcome {
-  padding: calc(var(--sat) + 22px) 62px 10px 20px;
+  padding: 14px 16px 8px;
 }
 .home-welcome-greeting {
   font-size: 13px;

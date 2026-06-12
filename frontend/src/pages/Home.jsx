@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 import { resetChallenge } from '../api/client';
-import ProfileButton from '../components/ProfileButton';
 
 function getDayIndex(startDateStr) {
   const start = new Date(startDateStr + 'T00:00:00');
@@ -100,12 +99,9 @@ export default function Home() {
   /* ── empty state ───────────────────────────────────────────────────────── */
   if (!activeChallenge) {
     return (
-      <>
-        <ProfileButton />
-        <div className="page">
+      <div className="page">
         <div className="home-welcome">
           <div className="home-welcome-greeting">{getGreeting()}</div>
-          {user && <div className="home-welcome-name">{user.username}</div>}
         </div>
         <div className="home-empty-card">
           <div className="home-empty-glyph">🌱</div>
@@ -117,8 +113,7 @@ export default function Home() {
             create a challenge →
           </button>
         </div>
-        </div>
-      </>
+      </div>
     );
   }
 
@@ -133,15 +128,12 @@ export default function Home() {
   const challengePct = Math.round((day / 30) * 100);
 
   return (
-    <>
-      <ProfileButton />
-      <div className="page home-page">
+    <div className="page home-page">
 
-        {/* ── fixed top: greeting + hero + stats ──────────────────────────── */}
-        <div className="home-fixed-top">
+      {/* ── fixed top: greeting + hero + stats ──────────────────────────── */}
+      <div className="home-fixed-top">
           <div className="home-welcome">
             <div className="home-welcome-greeting">{getGreeting()}</div>
-            {user && <div className="home-welcome-name">{user.username}</div>}
           </div>
 
           <div className="home-hero-card">
@@ -264,7 +256,6 @@ export default function Home() {
             </div>
           </div>
         )}
-      </div>
-    </>
+    </div>
   );
 }
