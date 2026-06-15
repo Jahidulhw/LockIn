@@ -43,11 +43,35 @@ export function AppProvider({ children }) {
   }, [setActiveChallenge]);
 
   const toggleHabit = useCallback(async (challengeId, habitId, date) => {
-    const updated = await api.toggleHabit(challengeId, habitId, date);
-    setChallenges((prev) => prev.map((c) => (c._id === challengeId ? updated : c)));
-    setActiveChallengeState((prev) => (prev?._id === challengeId ? updated : prev));
-    return updated;
-  }, []);
+    // Optimistic update — flip the habit immediately so the UI responds on first tap
+    function applyToggle(challenge) {
+      if (challenge._id !== challengeId) return challenge;
+      const completions = challenge.completions ? [...challenge.completions] : [];
+      const dayIdx = completions.findIndex((c) => c.date === date);
+      if (dayIdx === -1) {
+        return { ...challenge, completions: [...completions, { date, habits: [{ habitId, completed: true }] }] };
+      }
+      const day = completions[dayIdx];
+      const hIdx = day.habits.findIndex((h) => h.habitId === habitId);
+      const newHabits = hIdx === -1
+        ? [...day.habits, { habitId, completed: true }]
+        : day.habits.map((h) => h.habitId === habitId ? { ...h, completed: !h.completed } : h);
+      return { ...challenge, completions: completions.map((c, i) => i === dayIdx ? { ...c, habits: newHabits } : c) };
+    }
+    setChallenges((prev) => prev.map(applyToggle));
+    setActiveChallengeState((prev) => prev ? applyToggle(prev) : null);
+
+    try {
+      const updated = await api.toggleHabit(challengeId, habitId, date);
+      setChallenges((prev) => prev.map((c) => (c._id === challengeId ? updated : c)));
+      setActiveChallengeState((prev) => (prev?._id === challengeId ? updated : prev));
+      return updated;
+    } catch (err) {
+      // Revert by reloading authoritative state from server
+      loadChallenges();
+      throw err;
+    }
+  }, [loadChallenges]);
 
   const addHabit = useCallback(async (challengeId, habitData) => {
     const updated = await api.addHabit(challengeId, habitData);

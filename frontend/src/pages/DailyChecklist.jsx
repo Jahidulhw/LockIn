@@ -42,7 +42,8 @@ export default function DailyChecklist() {
   const navigate = useNavigate();
   const { activeChallenge, toggleHabit, deleteHabit, saveNote, loading } = useApp();
 
-  const [toggling, setToggling]       = useState(null);
+  const togglingRef = useRef(new Set());
+  const [togglingIds, setTogglingIds] = useState(new Set());
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [deleting, setDeleting]       = useState(false);
   const [toast, setToast]             = useState('');
@@ -90,17 +91,19 @@ export default function DailyChecklist() {
 
   const handleToggle = useCallback(
     async (habitId) => {
-      if (!activeChallenge || toggling) return;
-      setToggling(habitId);
+      if (!activeChallenge || togglingRef.current.has(habitId)) return;
+      togglingRef.current.add(habitId);
+      setTogglingIds(new Set(togglingRef.current));
       try {
         await toggleHabit(activeChallenge._id, habitId, date);
       } catch (err) {
         console.error('Toggle failed', err);
       } finally {
-        setToggling(null);
+        togglingRef.current.delete(habitId);
+        setTogglingIds(new Set(togglingRef.current));
       }
     },
-    [activeChallenge, date, toggleHabit, toggling]
+    [activeChallenge, date, toggleHabit]
   );
 
   const handleDelete = useCallback(async () => {
@@ -208,12 +211,12 @@ export default function DailyChecklist() {
         )}
         {habits.map((habit) => {
           const done = isHabitDone(habit.id);
-          const isToggling = toggling === habit.id;
+          const isToggling = togglingIds.has(habit.id);
           return (
             <div
               key={habit.id}
               className="habit-item"
-              onClick={() => !isToggling && handleToggle(habit.id)}
+              onClick={() => handleToggle(habit.id)}
               role="checkbox"
               aria-checked={done}
               tabIndex={0}

@@ -346,6 +346,7 @@ body {
   min-height: var(--tap);
   -webkit-user-select: none;
   user-select: none;
+  touch-action: manipulation;
   transition: opacity .15s;
   border-radius: 0;
 }
