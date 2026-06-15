@@ -17,11 +17,12 @@ export default function Header() {
 
   if (!user) return null;
   const initial = user.username[0].toUpperCase();
+  const displayName = user.username.charAt(0).toUpperCase() + user.username.slice(1);
 
   return (
     <div className="app-header">
       <div className="app-header-inner">
-        <span className="app-header-username">{user.username}</span>
+        <span className="app-header-username">{displayName}</span>
         <div className="app-header-avatar-wrap" ref={ref}>
           <button
             className="app-header-avatar"
@@ -35,7 +36,7 @@ export default function Header() {
             <div className="app-header-dropdown">
               <div className="profile-dropdown-user">
                 <div className="profile-dropdown-avatar">{initial}</div>
-                <div className="profile-dropdown-name">{user.username}</div>
+                <div className="profile-dropdown-name">{displayName}</div>
               </div>
               <div className="profile-dropdown-divider" />
               <button
