@@ -95,16 +95,17 @@ body {
 }
 
 /* ── Fixed App Header ── */
+:root {
+  --header-inner-h: 52px;
+  --header-h: calc(var(--sat) + var(--header-inner-h));
+}
 .app-header {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  width: 100%;
   z-index: 1000;
-  background: rgba(10, 10, 10, 0.94);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  background: var(--bg);
   border-bottom: 1px solid var(--border);
   padding-top: var(--sat);
 }
@@ -113,7 +114,7 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 0 16px;
-  height: 52px;
+  height: var(--header-inner-h);
 }
 .app-header-username {
   font-size: 18px;
@@ -545,7 +546,7 @@ body {
 /* ── Home Page (redesigned) ── */
 
 .home-page {
-  padding-top: calc(52px + var(--sat) + 12px);
+  padding-top: var(--header-h);
   padding-bottom: calc(88px + var(--sab));
 }
 
