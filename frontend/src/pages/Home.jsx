@@ -68,11 +68,10 @@ export default function Home() {
   const { activeChallenge, loading, error, reload } = useApp();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [showResetModal, setShowResetModal]     = useState(false);
-  const [resetting, setResetting]               = useState(false);
-  const [showCelebration, setShowCelebration]   = useState(false);
+  const [showResetModal, setShowResetModal]   = useState(false);
+  const [resetting, setResetting]             = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
 
-  // Fire celebration once when challenge day 30 is fully complete
   useEffect(() => {
     if (!activeChallenge) return;
     const day = getDayIndex(activeChallenge.startDate);
@@ -101,35 +100,34 @@ export default function Home() {
 
   if (loading) {
     return (
-      <>
+      <div className="home-shell">
         <Header />
-        <div className="page home-page">
+        <div className="home-scroll">
           <div className="loading-wrap"><div className="spinner" /></div>
         </div>
-      </>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <>
+      <div className="home-shell">
         <Header />
-        <div className="page home-page">
+        <div className="home-scroll">
           <div className="empty-state">
             <div className="empty-state-icon">😵</div>
             <div className="empty-state-text">can't reach the server<br />make sure the backend is running</div>
           </div>
         </div>
-      </>
+      </div>
     );
   }
 
-  /* ── empty state ── */
   if (!activeChallenge) {
     return (
-      <>
+      <div className="home-shell">
         <Header />
-        <div className="page home-page">
+        <div className="home-scroll">
           <div className="home-welcome">
             <div className="home-welcome-greeting">{getGreeting()}</div>
           </div>
@@ -144,11 +142,10 @@ export default function Home() {
             </button>
           </div>
         </div>
-      </>
+      </div>
     );
   }
 
-  /* ── active challenge ── */
   const day          = getDayIndex(activeChallenge.startDate);
   const todayStats   = getTodayStats(activeChallenge);
   const streak       = calcStreak(activeChallenge);
@@ -159,16 +156,14 @@ export default function Home() {
   const challengePct = Math.round((day / 30) * 100);
 
   return (
-    <>
+    <div className="home-shell">
       <Header />
 
-      <div className="page home-page">
-        {/* greeting */}
+      <div className="home-scroll">
         <div className="home-welcome">
           <div className="home-welcome-greeting">{getGreeting()}</div>
         </div>
 
-        {/* challenge hero card */}
         <div className="home-hero-card">
           <div className="home-hero-glow" />
           <div className="home-hero-top">
@@ -186,7 +181,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* quick stats */}
         <div className="home-stats-row">
           <div className="home-stat-card">
             <div className="home-stat-emoji">🔥</div>
@@ -205,7 +199,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* today's goals */}
         <div className="home-section">
           <div className="home-section-header">
             <span className="home-section-title">
@@ -255,7 +248,6 @@ export default function Home() {
           )}
         </div>
 
-        {/* CTA */}
         <div className="home-cta-wrap">
           <button
             className={`home-cta-btn${allDoneToday ? ' all-done' : ''}`}
@@ -265,19 +257,16 @@ export default function Home() {
           </button>
         </div>
 
-        {/* reset */}
         <div className="home-danger-row">
           <button className="home-nuke-btn" onClick={() => setShowResetModal(true)} disabled={resetting}>
             reset progress
           </button>
         </div>
 
-        {/* celebration overlay — fires once on 30-day completion */}
         {showCelebration && (
           <CelebrationOverlay onClose={() => setShowCelebration(false)} />
         )}
 
-        {/* reset modal */}
         {showResetModal && (
           <div className="modal-backdrop" onClick={() => !resetting && setShowResetModal(false)}>
             <div className="modal" onClick={(e) => e.stopPropagation()}>
@@ -295,6 +284,6 @@ export default function Home() {
           </div>
         )}
       </div>
-    </>
+    </div>
   );
 }

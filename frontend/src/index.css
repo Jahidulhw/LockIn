@@ -94,18 +94,10 @@ body {
   overflow-x: hidden;
 }
 
-/* ── Fixed App Header ── */
-:root {
-  --header-inner-h: 52px;
-  --header-h: calc(var(--sat) + var(--header-inner-h));
-}
+/* ── App Header (flex child — not fixed) ── */
 .app-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-  background: var(--bg);
+  flex-shrink: 0;
+  background: #000;
   border-bottom: 1px solid var(--border);
   padding-top: var(--sat);
 }
@@ -114,7 +106,7 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 0 16px;
-  height: var(--header-inner-h);
+  height: 52px;
 }
 .app-header-username {
   font-size: 18px;
@@ -543,10 +535,20 @@ body {
 .arrow-btn:active { transform: scale(.92); }
 .arrow-btn:disabled { opacity: .25; cursor: default; }
 
-/* ── Home Page (redesigned) ── */
+/* ── Home Page ── */
 
-.home-page {
-  padding-top: var(--header-h);
+.home-shell {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.home-scroll {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   padding-bottom: calc(88px + var(--sab));
 }
 
