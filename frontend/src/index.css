@@ -545,13 +545,13 @@ body {
 /* ── Home Page (redesigned) ── */
 
 .home-page {
-  padding-top: 120px;
+  padding-top: calc(52px + var(--sat) + 12px);
   padding-bottom: calc(88px + var(--sab));
 }
 
 /* greeting */
 .home-welcome {
-  padding: 14px 16px 8px;
+  padding: 8px 16px 6px;
 }
 .home-welcome-greeting {
   font-size: 13px;
