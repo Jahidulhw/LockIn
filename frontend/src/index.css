@@ -381,10 +381,6 @@ body {
   100% { transform: scale(1); }
 }
 
-.habit-checkbox.checking {
-  opacity: .6;
-  transform: scale(.9);
-}
 
 .habit-checkbox svg { transition: opacity .15s; opacity: 0; }
 .habit-checkbox.checked svg { opacity: 1; }

@@ -43,7 +43,6 @@ export default function DailyChecklist() {
   const { activeChallenge, toggleHabit, deleteHabit, saveNote, loading } = useApp();
 
   const togglingRef = useRef(new Set());
-  const [togglingIds, setTogglingIds] = useState(new Set());
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [deleting, setDeleting]       = useState(false);
   const [toast, setToast]             = useState('');
@@ -93,14 +92,12 @@ export default function DailyChecklist() {
     async (habitId) => {
       if (!activeChallenge || togglingRef.current.has(habitId)) return;
       togglingRef.current.add(habitId);
-      setTogglingIds(new Set(togglingRef.current));
       try {
         await toggleHabit(activeChallenge._id, habitId, date);
       } catch (err) {
         console.error('Toggle failed', err);
       } finally {
         togglingRef.current.delete(habitId);
-        setTogglingIds(new Set(togglingRef.current));
       }
     },
     [activeChallenge, date, toggleHabit]
@@ -211,7 +208,6 @@ export default function DailyChecklist() {
         )}
         {habits.map((habit) => {
           const done = isHabitDone(habit.id);
-          const isToggling = togglingIds.has(habit.id);
           return (
             <div
               key={habit.id}
@@ -222,7 +218,7 @@ export default function DailyChecklist() {
               tabIndex={0}
               onKeyDown={(e) => e.key === ' ' && handleToggle(habit.id)}
             >
-              <div className={`habit-checkbox ${done ? 'checked' : ''} ${isToggling ? 'checking' : ''}`}>
+              <div className={`habit-checkbox ${done ? 'checked' : ''}`}>
                 {done && (
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                     <path d="M2 7l4 4 6-6" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
