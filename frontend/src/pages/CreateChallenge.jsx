@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
+import PlantSVG from '../components/PlantSVG';
+import { PLANTS, getRarity, rollPlant, getPlant } from '../utils/plants';
 
 function todayStr() {
   return new Date().toISOString().split('T')[0];
@@ -61,6 +63,13 @@ const TEMPLATES = {
   ],
 };
 
+function RarityBadge({ rarityKey }) {
+  const r = getRarity(rarityKey);
+  return (
+    <span className={`rarity-badge rarity-${rarityKey}`}>{r.label}</span>
+  );
+}
+
 export default function CreateChallenge() {
   const { createChallenge } = useApp();
   const navigate = useNavigate();
@@ -68,10 +77,11 @@ export default function CreateChallenge() {
   const [name,        setName]        = useState('');
   const [startDate,   setStartDate]   = useState(todayStr());
   const [category,    setCategory]    = useState('Popular');
-  const [selected,    setSelected]    = useState(new Set()); // "emoji name" keys
-  const [customs,     setCustoms]     = useState([]);        // plain strings
+  const [selected,    setSelected]    = useState(new Set());
+  const [customs,     setCustoms]     = useState([]);
   const [customDraft, setCustomDraft] = useState('');
   const [showCustom,  setShowCustom]  = useState(false);
+  const [plantType,   setPlantType]   = useState('flower');
   const [saving,      setSaving]      = useState(false);
   const [errors,      setErrors]      = useState({});
 
@@ -99,22 +109,24 @@ export default function CreateChallenge() {
   }
 
   const totalHabits = selected.size + customs.length;
+  const selectedPlant = getPlant(plantType);
 
   async function handleSubmit(e) {
     e.preventDefault();
     const errs = {};
-    if (!name.trim())  errs.name   = 'give it a name first';
-    if (!startDate)    errs.startDate = 'need a start date';
-    if (totalHabits === 0) errs.habits = 'pick at least one habit';
+    if (!name.trim())      errs.name      = 'give it a name first';
+    if (!startDate)        errs.startDate = 'need a start date';
+    if (totalHabits === 0) errs.habits    = 'pick at least one habit';
     if (Object.keys(errs).length) { setErrors(errs); return; }
 
     setSaving(true);
     try {
+      const { actualRarity } = rollPlant(selectedPlant);
       const habits = [
         ...Array.from(selected).map((key) => ({ name: key })),
         ...customs.map((n) => ({ name: n })),
       ];
-      await createChallenge({ name: name.trim(), startDate, habits });
+      await createChallenge({ name: name.trim(), startDate, habits, plantType, plantRarity: actualRarity });
       navigate('/');
     } catch (err) {
       setErrors({ submit: err.message });
@@ -172,7 +184,6 @@ export default function CreateChallenge() {
 
           {errors.habits && <div className="form-error" style={{ marginBottom: 10 }}>{errors.habits}</div>}
 
-          {/* Category chips */}
           <div className="habit-categories" style={{ marginBottom: 12 }}>
             {CATEGORIES.map((cat) => (
               <button
@@ -186,11 +197,10 @@ export default function CreateChallenge() {
             ))}
           </div>
 
-          {/* Template list */}
           <div className="habit-template-list">
             {templates.map(({ emoji, name: habitName }) => {
-              const key      = `${emoji} ${habitName}`;
-              const isOn     = selected.has(key);
+              const key  = `${emoji} ${habitName}`;
+              const isOn = selected.has(key);
               return (
                 <div
                   key={key}
@@ -208,7 +218,6 @@ export default function CreateChallenge() {
             })}
           </div>
 
-          {/* Custom habit */}
           <div className="custom-habit-section" style={{ marginTop: 8 }}>
             {customs.map((c) => (
               <div key={c} className="habit-template-item is-selected" style={{ marginBottom: 6 }}>
@@ -272,6 +281,58 @@ export default function CreateChallenge() {
               </div>
             )}
           </div>
+        </div>
+
+        {/* Plant selector */}
+        <div className="form-group">
+          <label className="form-label">choose your plant</label>
+          <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 10 }}>
+            your companion for the next 30 days
+          </div>
+          <div className="plant-selector-grid">
+            {PLANTS.map((plant) => {
+              const rarity   = getRarity(plant.rarity);
+              const isChosen = plantType === plant.id;
+              return (
+                <button
+                  key={plant.id}
+                  type="button"
+                  className={`plant-card${isChosen ? ` selected rarity-${plant.rarity}` : ''}`}
+                  onClick={() => setPlantType(plant.id)}
+                  style={isChosen ? { borderColor: rarity.border, boxShadow: `0 0 14px ${rarity.glow}` } : undefined}
+                >
+                  <PlantSVG
+                    plantType={plant.id}
+                    progress={70}
+                    style={{ width: 56, height: 90 }}
+                    instanceId={`sel-${plant.id}`}
+                  />
+                  <div className="plant-card-name">{plant.name}</div>
+                  <RarityBadge rarityKey={plant.rarity} />
+                  {plant.odds < 1 && (
+                    <div className="plant-card-odds">{Math.round(plant.odds * 100)}% chance</div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          {selectedPlant.odds < 1 && (
+            <div style={{
+              marginTop: 8,
+              padding: '8px 12px',
+              background: 'rgba(245,158,11,.07)',
+              border: '1px solid rgba(245,158,11,.22)',
+              borderRadius: 10,
+              fontSize: 12,
+              color: 'var(--muted)',
+              lineHeight: 1.5
+            }}>
+              ⚡ <strong style={{ color: '#F59E0B' }}>{selectedPlant.name}</strong> is rare.{' '}
+              you have a <strong style={{ color: '#F59E0B' }}>{Math.round(selectedPlant.odds * 100)}%</strong> chance of getting{' '}
+              {getRarity(selectedPlant.rarity).label} — or you'll receive a{' '}
+              {getRarity(['common','rare','epic','legendary','mythic'][Math.max(0, ['common','rare','epic','legendary','mythic'].indexOf(selectedPlant.rarity) - 1)]).label} plant instead.
+            </div>
+          )}
         </div>
 
         {errors.submit && (

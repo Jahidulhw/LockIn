@@ -60,7 +60,7 @@ router.get('/:id', async (req, res) => {
 // POST /api/challenges
 router.post('/', async (req, res) => {
   try {
-    const { name, startDate, habits = [] } = req.body;
+    const { name, startDate, habits = [], plantType = 'flower', plantRarity = 'common' } = req.body;
     if (!name || !startDate) {
       return res.status(400).json({ error: 'name and startDate are required' });
     }
@@ -78,6 +78,8 @@ router.post('/', async (req, res) => {
       habits: processedHabits,
       completions: [],
       notes: [],
+      plantType,
+      plantRarity,
       createdAt: new Date().toISOString()
     };
     const ref = await CHALLENGES.add(data);

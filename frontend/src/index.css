@@ -2390,3 +2390,103 @@ body {
 }
 .celebration-close-btn:hover  { opacity: .9; transform: translateY(-1px); }
 .celebration-close-btn:active { transform: scale(.97); }
+
+/* ── Rarity badges ───────────────────────────────────────────────────────── */
+.rarity-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 9px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 20px;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  border: 1px solid;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.rarity-badge.rarity-common    { color: #4ADE80; border-color: rgba(74,222,128,.5);   background: rgba(74,222,128,.08); }
+.rarity-badge.rarity-rare      { color: #60A5FA; border-color: rgba(96,165,250,.55);  background: rgba(96,165,250,.08); }
+.rarity-badge.rarity-epic      { color: #A855F7; border-color: rgba(168,85,247,.6);   background: rgba(168,85,247,.08); }
+.rarity-badge.rarity-legendary { color: #F59E0B; border-color: rgba(245,158,11,.65);  background: rgba(245,158,11,.08); }
+.rarity-badge.rarity-mythic    { color: #E879F9; border-color: rgba(167,139,250,.7);  background: rgba(167,139,250,.1); animation: mythicGlow 2s linear infinite; }
+
+@keyframes mythicGlow {
+  0%   { border-color: rgba(167,139,250,.8); color: #E879F9; }
+  33%  { border-color: rgba(244,114,182,.8); color: #F472B6; }
+  66%  { border-color: rgba(96,165,250,.8);  color: #A78BFA; }
+  100% { border-color: rgba(167,139,250,.8); color: #E879F9; }
+}
+
+/* ── Plant selector grid (CreateChallenge) ───────────────────────────────── */
+.plant-selector-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.plant-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  padding: 12px 8px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: border-color .18s, background .18s, box-shadow .18s, transform .14s;
+  font-family: inherit;
+}
+
+.plant-card:hover  { border-color: var(--border-strong); transform: translateY(-1px); }
+.plant-card:active { transform: scale(.96); }
+
+.plant-card.selected { background: rgba(139,92,246,.05); }
+
+.plant-card-name {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-2);
+  text-align: center;
+  line-height: 1.2;
+}
+
+.plant-card-odds {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+/* ── Challenge plant section (Focus page) ────────────────────────────────── */
+.challenge-plant-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px 16px 24px;
+  gap: 10px;
+}
+
+.challenge-plant-name {
+  font-size: 19px;
+  font-weight: 900;
+  color: var(--text);
+  letter-spacing: -.02em;
+  text-align: center;
+}
+
+.challenge-plant-progress-row {
+  width: 100%;
+  max-width: 280px;
+}
+
+.challenge-plant-day-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
