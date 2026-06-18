@@ -1,7 +1,4 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { useApp } from '../context/AppContext';
-import PlantSVG from '../components/PlantSVG';
-import { getPlant, getRarity } from '../utils/plants';
 
 // ─── quick preset options ──────────────────────────────────────────────────
 const QUICK_PRESETS = [
@@ -284,18 +281,8 @@ function loadSessions() { try { return JSON.parse(localStorage.getItem(SK) || '[
 function saveSessions(l) { localStorage.setItem(SK, JSON.stringify(l)); }
 
 // ─── Main component ────────────────────────────────────────────────────────
-function getChallengeProgress(challenge) {
-  if (!challenge?.startDate) return 0;
-  const start = new Date(challenge.startDate + 'T00:00:00');
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const days = Math.min(29, Math.max(0, Math.floor((today - start) / 86400000)));
-  return Math.round((days / 29) * 100);
-}
-
 export default function Focus() {
-  const { activeChallenge } = useApp();
-  const [tab,         setTab]         = useState('challenge');
+  const [tab,         setTab]         = useState('timer');
   const [phase,       setPhase]       = useState('setup');   // setup|running|paused|done
   const [activity,    setActivity]    = useState('');
   const [preset,      setPreset]      = useState(1800);      // active quick-preset value
@@ -402,14 +389,6 @@ export default function Focus() {
       {/* ── Inner tab bar ── */}
       <div className="focus-tabs">
         <button
-          className={`focus-tab ${tab === 'challenge' ? 'active' : ''}`}
-          onClick={() => { if (!isActive) setTab('challenge'); }}
-          style={{ opacity: isActive ? 0.45 : 1, cursor: isActive ? 'default' : 'pointer' }}
-          title={isActive ? 'finish your session first' : undefined}
-        >
-          🌱 challenge
-        </button>
-        <button
           className={`focus-tab ${tab === 'timer' ? 'active' : ''}`}
           onClick={() => setTab('timer')}
         >
@@ -427,78 +406,6 @@ export default function Focus() {
           )}
         </button>
       </div>
-
-      {/* ── Challenge plant tab ── */}
-      {tab === 'challenge' && (() => {
-        if (!activeChallenge) {
-          return (
-            <div className="empty-state">
-              <div className="empty-state-icon">🌱</div>
-              <div className="empty-state-text">no active challenge<br />start one to grow your plant</div>
-            </div>
-          );
-        }
-        const plantType     = activeChallenge.plantType  || 'flower';
-        const rarityKey     = activeChallenge.plantRarity || 'common';
-        const plant         = getPlant(plantType);
-        const rarity        = getRarity(rarityKey);
-        const cp            = getChallengeProgress(activeChallenge);
-        const todayStr      = new Date().toISOString().split('T')[0];
-        const start         = new Date(activeChallenge.startDate + 'T00:00:00');
-        const todayMid      = new Date(); todayMid.setHours(0, 0, 0, 0);
-        const dayIndex      = Math.max(0, Math.floor((todayMid - start) / 86400000));
-        const currentDay    = Math.min(30, dayIndex + 1);
-        const daysLeft      = Math.max(0, 30 - currentDay);
-        const todayEntry    = activeChallenge.completions?.find((c) => c.date === todayStr);
-        const totalHabits   = activeChallenge.habits?.length || 0;
-        const doneTodayCount = todayEntry ? todayEntry.habits.filter((h) => h.completed).length : 0;
-
-        return (
-          <div className="challenge-plant-section">
-            <div className="challenge-plant-name">{activeChallenge.name}</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span className={`rarity-badge rarity-${rarityKey}`}>{rarity.label}</span>
-              <span style={{ fontSize: 13, color: 'var(--muted)', fontWeight: 600 }}>{plant.name} {plant.emoji}</span>
-            </div>
-            <div className="plant-display-wrap">
-              <PlantSVG
-                plantType={plantType}
-                progress={cp}
-                style={{ width: 180, height: 288 }}
-                instanceId="challenge-tab"
-              />
-            </div>
-            <div className="challenge-plant-progress-row">
-              <div className="challenge-plant-day-label">
-                <span>day {currentDay} of 30</span>
-                <span>{cp}% grown</span>
-              </div>
-              <div className="progress-bar-wrap">
-                <div className="progress-bar-fill" style={{ width: `${cp}%` }} />
-              </div>
-            </div>
-            <div style={{ display: 'flex', gap: 16 }}>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 22, fontWeight: 900, color: 'var(--text)', letterSpacing: '-.03em' }}>
-                  {doneTodayCount}/{totalHabits}
-                </div>
-                <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.06em' }}>
-                  today
-                </div>
-              </div>
-              <div style={{ width: 1, background: 'var(--border)' }} />
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 22, fontWeight: 900, color: 'var(--text)', letterSpacing: '-.03em' }}>
-                  {daysLeft}
-                </div>
-                <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.06em' }}>
-                  days left
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      })()}
 
       {/* ── Timer tab ── */}
       {tab === 'timer' && (
