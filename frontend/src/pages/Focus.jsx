@@ -68,6 +68,11 @@ function fmtDate(iso) {
   return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
+// ─── haptic feedback on goal completion ───────────────────────────────────
+function playVibrate() {
+  try { navigator.vibrate?.([200, 100, 200, 100, 200]); } catch {}
+}
+
 // ─── ding sound (C major chord) ────────────────────────────────────────────
 function playDing() {
   try {
@@ -318,6 +323,7 @@ export default function Focus() {
       clearInterval(timerRef.current);
       setPhase('done');
       playDing();
+      playVibrate();
       const s = {
         id:          `${Date.now()}`,
         activity:    activityRef.current,
