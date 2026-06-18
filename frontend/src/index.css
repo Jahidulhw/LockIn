@@ -50,6 +50,12 @@
   --muted:         #6b7280;
   --dimmed:        #374151;
 
+  /* Surfaces — navbar / header (overridden per theme) */
+  --nav-bg:          rgba(14, 14, 14, 0.94);
+  --header-bg:       #000000;
+  --page-header-bg:  rgba(10, 10, 10, 0.94);
+  --hero-glow-color: rgba(139, 92, 246, 0.22);
+
   /* Shape */
   --radius:        14px;
   --radius-sm:     10px;
@@ -97,7 +103,7 @@ body {
 /* ── App Header (flex child — not fixed) ── */
 .app-header {
   flex-shrink: 0;
-  background: #000;
+  background: var(--header-bg);
   border-bottom: 1px solid var(--border);
   padding-top: var(--sat);
 }
@@ -164,7 +170,7 @@ body {
   width: 100%;
   max-width: 428px;
   height: calc(68px + var(--sab));
-  background: rgba(14, 14, 14, 0.94);
+  background: var(--nav-bg);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border-top: 1px solid var(--border);
@@ -224,7 +230,7 @@ body {
 /* ── Page Header ── */
 .page-header {
   padding: calc(var(--sat) + 14px) 16px 14px;
-  background: rgba(10, 10, 10, 0.94);
+  background: var(--page-header-bg);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
@@ -486,7 +492,7 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 14px 16px 10px;
-  background: rgba(10, 10, 10, 0.92);
+  background: var(--page-header-bg);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
@@ -584,7 +590,7 @@ body {
   position: absolute;
   top: -60px; left: -60px; right: -60px;
   height: 160px;
-  background: radial-gradient(ellipse at 50% 0%, rgba(139,92,246,.22), transparent 68%);
+  background: radial-gradient(ellipse at 50% 0%, var(--hero-glow-color), transparent 68%);
   pointer-events: none;
 }
 .home-hero-top {
@@ -2180,7 +2186,7 @@ body {
   top: calc(100% + 8px);
   left: 50%;
   transform: translateX(-50%);
-  min-width: 188px;
+  min-width: 220px;
   background: var(--surface-2);
   border: 1px solid var(--border-strong);
   border-radius: 14px;
@@ -2489,4 +2495,248 @@ body {
   color: var(--muted);
   font-weight: 600;
   margin-bottom: 6px;
+}
+
+/* ── Theme picker (ProfileButton dropdown) ───────────────────────────────── */
+
+.profile-theme-section {
+  padding: 10px 14px 14px;
+}
+
+.profile-theme-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  margin-bottom: 8px;
+}
+
+.profile-theme-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+}
+
+.profile-theme-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: 1.5px solid transparent;
+  border-radius: 10px;
+  padding: 6px 4px 7px;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+  font-family: inherit;
+}
+.profile-theme-btn:hover { background: var(--surface-3); }
+.profile-theme-btn.selected {
+  border-color: var(--blue);
+  background: var(--blue-light);
+}
+
+.profile-theme-swatch {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--swatch-bg);
+  position: relative;
+  border: 2px solid rgba(128, 128, 128, 0.18);
+  flex-shrink: 0;
+}
+.profile-theme-swatch::after {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border-radius: 50%;
+  background: var(--swatch-accent);
+}
+
+.profile-theme-name {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+  letter-spacing: .01em;
+}
+.profile-theme-btn.selected .profile-theme-name { color: var(--blue); }
+
+/* ── Smooth theme transitions ────────────────────────────────────────────── */
+
+html.theme-transitioning *,
+html.theme-transitioning *::before,
+html.theme-transitioning *::after {
+  transition:
+    background-color 0.28s ease,
+    background     0.28s ease,
+    border-color   0.28s ease,
+    color          0.28s ease,
+    box-shadow     0.28s ease !important;
+}
+
+/* ── Light theme ─────────────────────────────────────────────────────────── */
+
+[data-theme="light"] {
+  color-scheme: light;
+  --bg:              #f5f4f2;
+  --surface:         #ffffff;
+  --surface-2:       #f0efed;
+  --surface-3:       #e6e5e2;
+  --border:          rgba(0, 0, 0, 0.08);
+  --border-strong:   rgba(0, 0, 0, 0.14);
+  --text:            #111111;
+  --text-2:          #333333;
+  --muted:           #6b6b6b;
+  --dimmed:          #b0b0b0;
+  --blue:            #7c3aed;
+  --blue-dark:       #6d28d9;
+  --blue-light:      rgba(124, 58, 237, 0.10);
+  --cyan:            #9333ea;
+  --cyan-dim:        rgba(147, 51, 234, 0.10);
+  --purple:          #7c3aed;
+  --purple-light:    rgba(124, 58, 237, 0.10);
+  --purple-glow:     rgba(124, 58, 237, 0.28);
+  --green:           #16a34a;
+  --green-light:     rgba(22, 163, 74, 0.12);
+  --green-glow:      rgba(22, 163, 74, 0.30);
+  --red:             #dc2626;
+  --red-dark:        #b91c1c;
+  --red-light:       rgba(220, 38, 38, 0.10);
+  --red-glow:        rgba(220, 38, 38, 0.26);
+  --amber:           #d97706;
+  --amber-light:     rgba(217, 119, 6, 0.10);
+  --shadow:          0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-md:       0 8px 32px rgba(0, 0, 0, 0.12);
+  --shadow-purple:   0 4px 20px rgba(124, 58, 237, 0.20);
+  --shadow-red:      0 4px 16px rgba(220, 38, 38, 0.18);
+  --nav-bg:          rgba(245, 244, 242, 0.96);
+  --header-bg:       #ffffff;
+  --page-header-bg:  rgba(245, 244, 242, 0.97);
+  --hero-glow-color: rgba(124, 58, 237, 0.13);
+}
+
+/* ── Midnight theme ──────────────────────────────────────────────────────── */
+
+[data-theme="midnight"] {
+  color-scheme: dark;
+  --bg:              #07091a;
+  --surface:         #0e1230;
+  --surface-2:       #151938;
+  --surface-3:       #1c2140;
+  --border:          rgba(129, 140, 248, 0.10);
+  --border-strong:   rgba(129, 140, 248, 0.20);
+  --text:            #eef0ff;
+  --text-2:          #c7cefc;
+  --muted:           #7d88e8;
+  --dimmed:          #3a4480;
+  --blue:            #818cf8;
+  --blue-dark:       #6366f1;
+  --blue-light:      rgba(129, 140, 248, 0.14);
+  --cyan:            #a5b4fc;
+  --cyan-dim:        rgba(165, 180, 252, 0.12);
+  --purple:          #a78bfa;
+  --purple-light:    rgba(167, 139, 250, 0.12);
+  --purple-glow:     rgba(129, 140, 248, 0.42);
+  --shadow:          0 2px 8px rgba(0, 0, 0, 0.65);
+  --shadow-md:       0 8px 32px rgba(0, 0, 0, 0.78);
+  --shadow-purple:   0 4px 20px rgba(129, 140, 248, 0.38);
+  --nav-bg:          rgba(7, 9, 26, 0.96);
+  --header-bg:       #07091a;
+  --page-header-bg:  rgba(7, 9, 26, 0.96);
+  --hero-glow-color: rgba(129, 140, 248, 0.22);
+}
+
+/* ── Ocean theme ─────────────────────────────────────────────────────────── */
+
+[data-theme="ocean"] {
+  color-scheme: dark;
+  --bg:              #040e18;
+  --surface:         #091828;
+  --surface-2:       #0f2235;
+  --surface-3:       #162c42;
+  --border:          rgba(34, 211, 238, 0.09);
+  --border-strong:   rgba(34, 211, 238, 0.18);
+  --text:            #e0f8ff;
+  --text-2:          #a8e6f0;
+  --muted:           #38bdf8;
+  --dimmed:          #1a4060;
+  --blue:            #22d3ee;
+  --blue-dark:       #0891b2;
+  --blue-light:      rgba(34, 211, 238, 0.13);
+  --cyan:            #06b6d4;
+  --cyan-dim:        rgba(6, 182, 212, 0.12);
+  --purple:          #22d3ee;
+  --purple-light:    rgba(34, 211, 238, 0.10);
+  --purple-glow:     rgba(34, 211, 238, 0.40);
+  --shadow:          0 2px 8px rgba(0, 0, 0, 0.65);
+  --shadow-md:       0 8px 32px rgba(0, 0, 0, 0.78);
+  --shadow-purple:   0 4px 20px rgba(34, 211, 238, 0.32);
+  --nav-bg:          rgba(4, 14, 24, 0.97);
+  --header-bg:       #040e18;
+  --page-header-bg:  rgba(4, 14, 24, 0.97);
+  --hero-glow-color: rgba(34, 211, 238, 0.18);
+}
+
+/* ── Forest theme ────────────────────────────────────────────────────────── */
+
+[data-theme="forest"] {
+  color-scheme: dark;
+  --bg:              #060d08;
+  --surface:         #0d1a0f;
+  --surface-2:       #132016;
+  --surface-3:       #1a2a1d;
+  --border:          rgba(74, 222, 128, 0.09);
+  --border-strong:   rgba(74, 222, 128, 0.18);
+  --text:            #e8fdef;
+  --text-2:          #a7f3c0;
+  --muted:           #4ade80;
+  --dimmed:          #1a3d24;
+  --blue:            #34d399;
+  --blue-dark:       #10b981;
+  --blue-light:      rgba(52, 211, 153, 0.13);
+  --cyan:            #86efac;
+  --cyan-dim:        rgba(134, 239, 172, 0.12);
+  --purple:          #34d399;
+  --purple-light:    rgba(52, 211, 153, 0.10);
+  --purple-glow:     rgba(52, 211, 153, 0.40);
+  --shadow:          0 2px 8px rgba(0, 0, 0, 0.65);
+  --shadow-md:       0 8px 32px rgba(0, 0, 0, 0.78);
+  --shadow-purple:   0 4px 20px rgba(52, 211, 153, 0.32);
+  --nav-bg:          rgba(6, 13, 8, 0.97);
+  --header-bg:       #060d08;
+  --page-header-bg:  rgba(6, 13, 8, 0.97);
+  --hero-glow-color: rgba(52, 211, 153, 0.18);
+}
+
+/* ── Sunset theme ────────────────────────────────────────────────────────── */
+
+[data-theme="sunset"] {
+  color-scheme: dark;
+  --bg:              #0d0804;
+  --surface:         #1a1008;
+  --surface-2:       #21160a;
+  --surface-3:       #2a1c0d;
+  --border:          rgba(251, 146, 60, 0.10);
+  --border-strong:   rgba(251, 146, 60, 0.18);
+  --text:            #fff8f0;
+  --text-2:          #fde8cc;
+  --muted:           #fb923c;
+  --dimmed:          #78350f;
+  --blue:            #f97316;
+  --blue-dark:       #ea580c;
+  --blue-light:      rgba(249, 115, 22, 0.13);
+  --cyan:            #fbbf24;
+  --cyan-dim:        rgba(251, 191, 36, 0.12);
+  --purple:          #f97316;
+  --purple-light:    rgba(249, 115, 22, 0.10);
+  --purple-glow:     rgba(249, 115, 22, 0.40);
+  --shadow:          0 2px 8px rgba(0, 0, 0, 0.65);
+  --shadow-md:       0 8px 32px rgba(0, 0, 0, 0.78);
+  --shadow-purple:   0 4px 20px rgba(249, 115, 22, 0.32);
+  --nav-bg:          rgba(13, 8, 4, 0.97);
+  --header-bg:       #0d0804;
+  --page-header-bg:  rgba(13, 8, 4, 0.97);
+  --hero-glow-color: rgba(249, 115, 22, 0.18);
 }
