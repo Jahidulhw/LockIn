@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useTheme, THEMES } from '../context/ThemeContext';
 
 export default function Header() {
   const { user, logout } = useAuth();
+  const { theme, setTheme } = useTheme();
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
@@ -38,6 +40,29 @@ export default function Header() {
                 <div className="profile-dropdown-avatar">{initial}</div>
                 <div className="profile-dropdown-name">{displayName}</div>
               </div>
+              <div className="profile-dropdown-divider" />
+
+              {/* Theme picker */}
+              <div className="profile-theme-section">
+                <div className="profile-theme-label">appearance</div>
+                <div className="profile-theme-grid">
+                  {THEMES.map((t) => (
+                    <button
+                      key={t.id}
+                      className={`profile-theme-btn ${theme === t.id ? 'selected' : ''}`}
+                      onClick={() => setTheme(t.id)}
+                      title={t.name}
+                    >
+                      <div
+                        className="profile-theme-swatch"
+                        style={{ '--swatch-bg': t.swatch[0], '--swatch-accent': t.swatch[1] }}
+                      />
+                      <span className="profile-theme-name">{t.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className="profile-dropdown-divider" />
               <button
                 className="profile-dropdown-item profile-dropdown-logout"

@@ -145,13 +145,13 @@ body {
   position: absolute;
   top: calc(100% + 10px);
   right: 0;
-  background: var(--surface);
+  background: var(--surface-2);
   border: 1px solid var(--border-strong);
-  border-radius: 16px;
-  padding: 8px;
-  min-width: 180px;
-  box-shadow: 0 12px 40px rgba(0,0,0,.5);
+  border-radius: 14px;
+  min-width: 220px;
+  box-shadow: var(--shadow-md);
   z-index: 300;
+  overflow: hidden;
 }
 
 .page {
