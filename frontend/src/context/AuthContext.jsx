@@ -33,6 +33,7 @@ export function AuthProvider({ children }) {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
     localStorage.removeItem('activeChallenge');
+    localStorage.removeItem('lockin_challenges_cache');
     setToken(null);
     setUser(null);
   }, []);

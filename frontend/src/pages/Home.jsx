@@ -64,8 +64,58 @@ function getMotivation(pct, streak) {
   return "let's make today count";
 }
 
+function HomeSkeleton() {
+  return (
+    <div className="home-shell">
+      <Header />
+      <div className="home-scroll">
+        <div className="home-welcome">
+          <div className="skeleton" style={{ width: 120, height: 13, borderRadius: 6, marginBottom: 2 }} />
+        </div>
+        <div className="home-hero-card" style={{ minHeight: 160 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <div className="skeleton" style={{ width: 80, height: 11, borderRadius: 5 }} />
+            <div className="skeleton" style={{ width: 60, height: 22, borderRadius: 20 }} />
+          </div>
+          <div className="skeleton" style={{ width: '70%', height: 24, borderRadius: 8, marginBottom: 8 }} />
+          <div className="skeleton" style={{ width: '45%', height: 13, borderRadius: 6, marginBottom: 20 }} />
+          <div className="home-progress-track">
+            <div className="skeleton" style={{ width: '40%', height: '100%', borderRadius: 'inherit' }} />
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8 }}>
+            <div className="skeleton" style={{ width: 60, height: 12, borderRadius: 5 }} />
+            <div className="skeleton" style={{ width: 60, height: 12, borderRadius: 5 }} />
+          </div>
+        </div>
+        <div className="home-stats-row">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="home-stat-card" style={{ gap: 6 }}>
+              <div className="skeleton" style={{ width: 28, height: 28, borderRadius: '50%' }} />
+              <div className="skeleton" style={{ width: 36, height: 22, borderRadius: 6 }} />
+              <div className="skeleton" style={{ width: 52, height: 11, borderRadius: 5 }} />
+            </div>
+          ))}
+        </div>
+        <div className="home-section">
+          <div className="home-section-header">
+            <div className="skeleton" style={{ width: 100, height: 13, borderRadius: 6 }} />
+          </div>
+          <div className="home-goals-card">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="home-habit-row" style={{ gap: 10 }}>
+                <div className="skeleton" style={{ width: 22, height: 22, borderRadius: 6 }} />
+                <div className="skeleton" style={{ flex: 1, height: 14, borderRadius: 6 }} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Home() {
-  const { activeChallenge, loading, error, reload } = useApp();
+  const { activeChallenge, loading, refreshing, error, reload } = useApp();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [showResetModal, setShowResetModal]   = useState(false);
@@ -98,16 +148,8 @@ export default function Home() {
     }
   }
 
-  if (loading) {
-    return (
-      <div className="home-shell">
-        <Header />
-        <div className="home-scroll">
-          <div className="loading-wrap"><div className="spinner" /></div>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <HomeSkeleton />;
+
 
   if (error) {
     return (
@@ -157,6 +199,7 @@ export default function Home() {
 
   return (
     <div className="home-shell">
+      <div className={`sync-dot${refreshing ? ' visible' : ''}`} aria-hidden="true" />
       <Header />
 
       <div className="home-scroll">

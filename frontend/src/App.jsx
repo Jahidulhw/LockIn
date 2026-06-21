@@ -1,16 +1,23 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Suspense, lazy } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AppProvider } from './context/AppContext';
 import { ThemeProvider } from './context/ThemeContext';
 import NavBar from './components/NavBar';
 import Home from './pages/Home';
 import DailyChecklist from './pages/DailyChecklist';
-import Challenges from './pages/Challenges';
-import Analytics from './pages/Analytics';
-import CreateChallenge from './pages/CreateChallenge';
-import Focus from './pages/Focus';
-import AddHabit from './pages/AddHabit';
 import AuthPage from './pages/AuthPage';
+
+// Non-critical pages — lazy loaded so they don't block the initial paint
+const Challenges     = lazy(() => import('./pages/Challenges'));
+const Analytics      = lazy(() => import('./pages/Analytics'));
+const Focus          = lazy(() => import('./pages/Focus'));
+const AddHabit       = lazy(() => import('./pages/AddHabit'));
+const CreateChallenge = lazy(() => import('./pages/CreateChallenge'));
+
+function PageFallback() {
+  return <div className="loading-wrap"><div className="spinner" /></div>;
+}
 
 function ProtectedApp() {
   const { isLoggedIn } = useAuth();
@@ -20,17 +27,19 @@ function ProtectedApp() {
   return (
     <AppProvider>
       <div className="app">
-        <Routes>
-          <Route path="/"               element={<Home />} />
-          <Route path="/checklist"      element={<DailyChecklist />} />
-          <Route path="/checklist/:day" element={<DailyChecklist />} />
-          <Route path="/challenges"     element={<Challenges />} />
-          <Route path="/analytics"      element={<Analytics />} />
-          <Route path="/focus"          element={<Focus />} />
-          <Route path="/add-habit"      element={<AddHabit />} />
-          <Route path="/create"         element={<CreateChallenge />} />
-          <Route path="*"               element={<Navigate to="/" replace />} />
-        </Routes>
+        <Suspense fallback={<PageFallback />}>
+          <Routes>
+            <Route path="/"               element={<Home />} />
+            <Route path="/checklist"      element={<DailyChecklist />} />
+            <Route path="/checklist/:day" element={<DailyChecklist />} />
+            <Route path="/challenges"     element={<Challenges />} />
+            <Route path="/analytics"      element={<Analytics />} />
+            <Route path="/focus"          element={<Focus />} />
+            <Route path="/add-habit"      element={<AddHabit />} />
+            <Route path="/create"         element={<CreateChallenge />} />
+            <Route path="*"               element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
         <NavBar />
       </div>
     </AppProvider>

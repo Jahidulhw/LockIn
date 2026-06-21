@@ -1232,6 +1232,46 @@ body {
 
 .loading-wrap { display: flex; justify-content: center; padding: 48px 0; }
 
+/* ── Skeleton screens ── */
+@keyframes skeleton-shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--surface-2) 25%,
+    var(--surface-3) 50%,
+    var(--surface-2) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.6s ease infinite;
+  border-radius: var(--radius-xs);
+  flex-shrink: 0;
+}
+
+/* Subtle syncing indicator — tiny pulsing dot in bottom-right */
+.sync-dot {
+  position: fixed;
+  bottom: calc(72px + var(--sab));
+  right: 14px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--blue);
+  opacity: 0;
+  animation: sync-pulse 1.5s ease infinite;
+  pointer-events: none;
+  z-index: 50;
+}
+.sync-dot.visible { opacity: 1; }
+
+@keyframes sync-pulse {
+  0%, 100% { opacity: .3; transform: scale(1); }
+  50%       { opacity: 1;  transform: scale(1.25); }
+}
+
 /* ── Empty State ── */
 .empty-state {
   text-align: center;
