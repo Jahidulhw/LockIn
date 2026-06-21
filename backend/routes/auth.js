@@ -1,7 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
-const { createUser, findByUsername, comparePassword } = require('../models/User');
+const { createUser, findByUsername, comparePassword, updatePreferences } = require('../models/User');
+const authMiddleware = require('../middleware/auth');
+
+const VALID_THEMES = ['dark-forest', 'midnight-ocean', 'moonlight', 'sunset-beach', 'aurora', 'starfield'];
 
 function signToken(user) {
   return jwt.sign(
@@ -31,7 +34,7 @@ router.post('/signup', async (req, res) => {
     }
     const user = await createUser(normalized, password);
     const token = signToken(user);
-    res.status(201).json({ token, username: user.username, id: user._id });
+    res.status(201).json({ token, username: user.username, id: user._id, preferences: {} });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -54,7 +57,21 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'invalid username or password' });
     }
     const token = signToken(user);
-    res.json({ token, username: user.username, id: user._id });
+    res.json({ token, username: user.username, id: user._id, preferences: user.preferences || {} });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// PATCH /auth/preferences — save user preferences (theme, etc.)
+router.patch('/preferences', authMiddleware, async (req, res) => {
+  try {
+    const { theme } = req.body;
+    if (theme !== undefined && !VALID_THEMES.includes(theme)) {
+      return res.status(400).json({ error: 'invalid theme' });
+    }
+    await updatePreferences(req.user.username, { ...(theme !== undefined && { theme }) });
+    res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

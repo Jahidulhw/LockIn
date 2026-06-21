@@ -27,6 +27,9 @@ export const signup = (username, password) =>
 export const login = (username, password) =>
   fetchJSON('/auth/login', { method: 'POST', body: JSON.stringify({ username, password }) });
 
+export const savePreferences = (prefs) =>
+  fetchJSON('/auth/preferences', { method: 'PATCH', body: JSON.stringify(prefs) });
+
 // ── Challenges ────────────────────────────────────────────────────────────────
 export const getChallenges = () => fetchJSON('/api/challenges');
 

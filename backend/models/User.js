@@ -23,4 +23,8 @@ async function comparePassword(plaintext, hash) {
   return bcrypt.compare(plaintext, hash);
 }
 
-module.exports = { createUser, findByUsername, comparePassword };
+async function updatePreferences(username, prefs) {
+  await USERS.doc(username).update({ preferences: prefs });
+}
+
+module.exports = { createUser, findByUsername, comparePassword, updatePreferences };

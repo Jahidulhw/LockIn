@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useCallback } from 'react';
 import * as api from '../api/client';
+import { useTheme } from './ThemeContext';
 
 const AuthContext = createContext(null);
 
@@ -7,8 +8,10 @@ const TOKEN_KEY = 'lockin_token';
 const USER_KEY  = 'lockin_user';
 
 export function AuthProvider({ children }) {
-  const [token, setToken]   = useState(() => localStorage.getItem(TOKEN_KEY) || null);
-  const [user,  setUser]    = useState(() => {
+  const { setTheme } = useTheme();
+
+  const [token, setToken] = useState(() => localStorage.getItem(TOKEN_KEY) || null);
+  const [user,  setUser]  = useState(() => {
     try { return JSON.parse(localStorage.getItem(USER_KEY)); } catch { return null; }
   });
 
@@ -22,12 +25,17 @@ export function AuthProvider({ children }) {
   const signupFn = useCallback(async (username, password) => {
     const data = await api.signup(username, password);
     persist(data.token, { id: data.id, username: data.username });
+    // New users get the current (default) theme — nothing to restore
   }, [persist]);
 
   const loginFn = useCallback(async (username, password) => {
     const data = await api.login(username, password);
     persist(data.token, { id: data.id, username: data.username });
-  }, [persist]);
+    // Restore server-saved theme preference if one exists
+    if (data.preferences?.theme) {
+      setTheme(data.preferences.theme);
+    }
+  }, [persist, setTheme]);
 
   const logout = useCallback(() => {
     localStorage.removeItem(TOKEN_KEY);

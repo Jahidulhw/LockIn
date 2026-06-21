@@ -55,7 +55,7 @@ export default function Header() {
                     >
                       <div
                         className="profile-theme-swatch"
-                        style={{ '--swatch-bg': t.swatch[0], '--swatch-accent': t.swatch[1] }}
+                        style={{ background: t.gradient }}
                       />
                       <span className="profile-theme-name">{t.name}</span>
                     </button>

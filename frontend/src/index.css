@@ -76,11 +76,13 @@ html {
   -webkit-text-size-adjust: 100%;
   overflow-x: hidden;
   color-scheme: dark;
+  background: #050510; /* pre-theme fallback — html bg paints the full canvas */
+  min-height: 100%;
 }
 
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: var(--bg);
+  background: transparent; /* html background paints the atmospheric gradient */
   color: var(--text);
   line-height: 1.5;
   overscroll-behavior: none;
@@ -2578,20 +2580,12 @@ body {
 }
 
 .profile-theme-swatch {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: var(--swatch-bg);
-  position: relative;
-  border: 2px solid rgba(128, 128, 128, 0.18);
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 2px solid rgba(255,255,255,0.12);
   flex-shrink: 0;
-}
-.profile-theme-swatch::after {
-  content: '';
-  position: absolute;
-  inset: 5px;
-  border-radius: 50%;
-  background: var(--swatch-accent);
+  overflow: hidden;
 }
 
 .profile-theme-name {
@@ -2605,178 +2599,359 @@ body {
 
 /* ── Smooth theme transitions ────────────────────────────────────────────── */
 
+html.theme-transitioning {
+  transition: background 0.38s ease !important;
+}
 html.theme-transitioning *,
 html.theme-transitioning *::before,
 html.theme-transitioning *::after {
   transition:
-    background-color 0.28s ease,
-    background     0.28s ease,
-    border-color   0.28s ease,
-    color          0.28s ease,
-    box-shadow     0.28s ease !important;
+    background-color 0.30s ease,
+    background       0.30s ease,
+    border-color     0.30s ease,
+    color            0.30s ease,
+    box-shadow       0.30s ease !important;
 }
 
-/* ── Light theme ─────────────────────────────────────────────────────────── */
+/* ── Glassmorphic cards (all scenic themes) ──────────────────────────────── */
 
-[data-theme="light"] {
-  color-scheme: light;
-  --bg:              #f5f4f2;
-  --surface:         #ffffff;
-  --surface-2:       #f0efed;
-  --surface-3:       #e6e5e2;
-  --border:          rgba(0, 0, 0, 0.08);
-  --border-strong:   rgba(0, 0, 0, 0.14);
-  --text:            #111111;
-  --text-2:          #333333;
-  --muted:           #6b6b6b;
-  --dimmed:          #b0b0b0;
-  --blue:            #7c3aed;
-  --blue-dark:       #6d28d9;
-  --blue-light:      rgba(124, 58, 237, 0.10);
-  --cyan:            #9333ea;
-  --cyan-dim:        rgba(147, 51, 234, 0.10);
-  --purple:          #7c3aed;
-  --purple-light:    rgba(124, 58, 237, 0.10);
-  --purple-glow:     rgba(124, 58, 237, 0.28);
-  --green:           #16a34a;
-  --green-light:     rgba(22, 163, 74, 0.12);
-  --green-glow:      rgba(22, 163, 74, 0.30);
-  --red:             #dc2626;
-  --red-dark:        #b91c1c;
-  --red-light:       rgba(220, 38, 38, 0.10);
-  --red-glow:        rgba(220, 38, 38, 0.26);
-  --amber:           #d97706;
-  --amber-light:     rgba(217, 119, 6, 0.10);
-  --shadow:          0 2px 8px rgba(0, 0, 0, 0.08);
-  --shadow-md:       0 8px 32px rgba(0, 0, 0, 0.12);
-  --shadow-purple:   0 4px 20px rgba(124, 58, 237, 0.20);
-  --shadow-red:      0 4px 16px rgba(220, 38, 38, 0.18);
-  --nav-bg:          rgba(245, 244, 242, 0.96);
-  --header-bg:       #ffffff;
-  --page-header-bg:  rgba(245, 244, 242, 0.97);
-  --hero-glow-color: rgba(124, 58, 237, 0.13);
+[data-theme] .home-hero-card,
+[data-theme] .home-stat-card {
+  backdrop-filter: blur(14px) saturate(1.3);
+  -webkit-backdrop-filter: blur(14px) saturate(1.3);
 }
 
-/* ── Midnight theme ──────────────────────────────────────────────────────── */
+[data-theme] .app-header-dropdown {
+  backdrop-filter: blur(20px) saturate(1.2);
+  -webkit-backdrop-filter: blur(20px) saturate(1.2);
+}
 
-[data-theme="midnight"] {
+/* ── Dark Forest ─────────────────────────────────────────────────────────── */
+/*    Misty deep woods — layered fog glows in cool emerald and teal           */
+
+[data-theme="dark-forest"] {
   color-scheme: dark;
-  --bg:              #07091a;
-  --surface:         #0e1230;
-  --surface-2:       #151938;
-  --surface-3:       #1c2140;
-  --border:          rgba(129, 140, 248, 0.10);
-  --border-strong:   rgba(129, 140, 248, 0.20);
-  --text:            #eef0ff;
-  --text-2:          #c7cefc;
-  --muted:           #7d88e8;
-  --dimmed:          #3a4480;
-  --blue:            #818cf8;
-  --blue-dark:       #6366f1;
-  --blue-light:      rgba(129, 140, 248, 0.14);
-  --cyan:            #a5b4fc;
-  --cyan-dim:        rgba(165, 180, 252, 0.12);
-  --purple:          #a78bfa;
-  --purple-light:    rgba(167, 139, 250, 0.12);
-  --purple-glow:     rgba(129, 140, 248, 0.42);
-  --shadow:          0 2px 8px rgba(0, 0, 0, 0.65);
-  --shadow-md:       0 8px 32px rgba(0, 0, 0, 0.78);
-  --shadow-purple:   0 4px 20px rgba(129, 140, 248, 0.38);
-  --nav-bg:          rgba(7, 9, 26, 0.96);
-  --header-bg:       #07091a;
-  --page-header-bg:  rgba(7, 9, 26, 0.96);
-  --hero-glow-color: rgba(129, 140, 248, 0.22);
-}
+  background:
+    radial-gradient(ellipse at 18% 88%, rgba(12,62,24,0.90) 0%, transparent 44%),
+    radial-gradient(ellipse at 72% 72%, rgba(6,38,16,0.72) 0%, transparent 40%),
+    radial-gradient(ellipse at 50% 48%, rgba(18,52,22,0.45) 0%, transparent 58%),
+    radial-gradient(ellipse at 85% 20%, rgba(8,30,14,0.38) 0%, transparent 38%),
+    radial-gradient(ellipse at 50% 0%,  rgba(28,72,32,0.32) 0%, transparent 48%),
+    linear-gradient(180deg, #010604 0%, #020d07 28%, #041409 55%, #031008 80%, #010604 100%);
 
-/* ── Ocean theme ─────────────────────────────────────────────────────────── */
-
-[data-theme="ocean"] {
-  color-scheme: dark;
-  --bg:              #040e18;
-  --surface:         #091828;
-  --surface-2:       #0f2235;
-  --surface-3:       #162c42;
-  --border:          rgba(34, 211, 238, 0.09);
-  --border-strong:   rgba(34, 211, 238, 0.18);
-  --text:            #e0f8ff;
-  --text-2:          #a8e6f0;
-  --muted:           #38bdf8;
-  --dimmed:          #1a4060;
-  --blue:            #22d3ee;
-  --blue-dark:       #0891b2;
-  --blue-light:      rgba(34, 211, 238, 0.13);
-  --cyan:            #06b6d4;
-  --cyan-dim:        rgba(6, 182, 212, 0.12);
-  --purple:          #22d3ee;
-  --purple-light:    rgba(34, 211, 238, 0.10);
-  --purple-glow:     rgba(34, 211, 238, 0.40);
-  --shadow:          0 2px 8px rgba(0, 0, 0, 0.65);
-  --shadow-md:       0 8px 32px rgba(0, 0, 0, 0.78);
-  --shadow-purple:   0 4px 20px rgba(34, 211, 238, 0.32);
-  --nav-bg:          rgba(4, 14, 24, 0.97);
-  --header-bg:       #040e18;
-  --page-header-bg:  rgba(4, 14, 24, 0.97);
-  --hero-glow-color: rgba(34, 211, 238, 0.18);
-}
-
-/* ── Forest theme ────────────────────────────────────────────────────────── */
-
-[data-theme="forest"] {
-  color-scheme: dark;
-  --bg:              #060d08;
-  --surface:         #0d1a0f;
-  --surface-2:       #132016;
-  --surface-3:       #1a2a1d;
-  --border:          rgba(74, 222, 128, 0.09);
-  --border-strong:   rgba(74, 222, 128, 0.18);
-  --text:            #e8fdef;
-  --text-2:          #a7f3c0;
+  --bg:              transparent;
+  --surface:         rgba(3,14,6,0.62);
+  --surface-2:       rgba(5,20,8,0.48);
+  --surface-3:       rgba(8,28,12,0.38);
+  --border:          rgba(74,222,128,0.08);
+  --border-strong:   rgba(74,222,128,0.16);
+  --text:            #e2fdf0;
+  --text-2:          #a4f0bc;
   --muted:           #4ade80;
-  --dimmed:          #1a3d24;
+  --dimmed:          #183d22;
   --blue:            #34d399;
   --blue-dark:       #10b981;
-  --blue-light:      rgba(52, 211, 153, 0.13);
-  --cyan:            #86efac;
-  --cyan-dim:        rgba(134, 239, 172, 0.12);
+  --blue-light:      rgba(52,211,153,0.14);
+  --cyan:            #6ee7b7;
+  --cyan-dim:        rgba(110,231,183,0.12);
   --purple:          #34d399;
-  --purple-light:    rgba(52, 211, 153, 0.10);
-  --purple-glow:     rgba(52, 211, 153, 0.40);
-  --shadow:          0 2px 8px rgba(0, 0, 0, 0.65);
-  --shadow-md:       0 8px 32px rgba(0, 0, 0, 0.78);
-  --shadow-purple:   0 4px 20px rgba(52, 211, 153, 0.32);
-  --nav-bg:          rgba(6, 13, 8, 0.97);
-  --header-bg:       #060d08;
-  --page-header-bg:  rgba(6, 13, 8, 0.97);
-  --hero-glow-color: rgba(52, 211, 153, 0.18);
+  --purple-light:    rgba(52,211,153,0.10);
+  --purple-glow:     rgba(52,211,153,0.38);
+  --green:           #22c55e;
+  --green-light:     rgba(34,197,94,0.14);
+  --green-glow:      rgba(34,197,94,0.35);
+  --red:             #f87171;
+  --red-dark:        #ef4444;
+  --red-light:       rgba(248,113,113,0.14);
+  --red-glow:        rgba(248,113,113,0.30);
+  --amber:           #fcd34d;
+  --amber-light:     rgba(252,211,77,0.12);
+  --shadow:          0 2px 14px rgba(0,0,0,0.78);
+  --shadow-md:       0 8px 38px rgba(0,0,0,0.82);
+  --shadow-purple:   0 4px 22px rgba(52,211,153,0.28);
+  --shadow-red:      0 4px 16px rgba(248,113,113,0.28);
+  --nav-bg:          rgba(1,6,2,0.90);
+  --header-bg:       rgba(1,6,2,0.92);
+  --page-header-bg:  rgba(1,6,2,0.90);
+  --hero-glow-color: rgba(52,211,153,0.22);
 }
 
-/* ── Sunset theme ────────────────────────────────────────────────────────── */
+/* ── Midnight Ocean ──────────────────────────────────────────────────────── */
+/*    Still water at night — moon glimmers on the deep, stars above           */
 
-[data-theme="sunset"] {
+[data-theme="midnight-ocean"] {
   color-scheme: dark;
-  --bg:              #0d0804;
-  --surface:         #1a1008;
-  --surface-2:       #21160a;
-  --surface-3:       #2a1c0d;
-  --border:          rgba(251, 146, 60, 0.10);
-  --border-strong:   rgba(251, 146, 60, 0.18);
+  background:
+    radial-gradient(ellipse at 50%  7%, rgba(210,235,255,0.09) 0%, transparent 20%),
+    radial-gradient(ellipse at 50% 13%, rgba(160,210,255,0.05) 0%, transparent 16%),
+    radial-gradient(ellipse at 50% 96%, rgba(20,68,138,0.56) 0%, transparent 50%),
+    radial-gradient(ellipse at 22% 65%, rgba(10,46,100,0.36) 0%, transparent 40%),
+    radial-gradient(ellipse at 80% 55%, rgba(8,36,82,0.30) 0%, transparent 38%),
+    linear-gradient(180deg, #010309 0%, #020613 28%, #030d1e 54%, #020a14 80%, #010508 100%);
+
+  --bg:              transparent;
+  --surface:         rgba(2,8,22,0.64);
+  --surface-2:       rgba(3,12,30,0.50);
+  --surface-3:       rgba(5,17,40,0.40);
+  --border:          rgba(34,211,238,0.08);
+  --border-strong:   rgba(34,211,238,0.16);
+  --text:            #daf5ff;
+  --text-2:          #96e0f2;
+  --muted:           #38bdf8;
+  --dimmed:          #183d55;
+  --blue:            #22d3ee;
+  --blue-dark:       #0891b2;
+  --blue-light:      rgba(34,211,238,0.14);
+  --cyan:            #67e8f9;
+  --cyan-dim:        rgba(103,232,249,0.12);
+  --purple:          #22d3ee;
+  --purple-light:    rgba(34,211,238,0.10);
+  --purple-glow:     rgba(34,211,238,0.38);
+  --green:           #34d399;
+  --green-light:     rgba(52,211,153,0.14);
+  --green-glow:      rgba(52,211,153,0.32);
+  --red:             #f87171;
+  --red-dark:        #ef4444;
+  --red-light:       rgba(248,113,113,0.14);
+  --red-glow:        rgba(248,113,113,0.28);
+  --amber:           #fcd34d;
+  --amber-light:     rgba(252,211,77,0.12);
+  --shadow:          0 2px 14px rgba(0,0,0,0.80);
+  --shadow-md:       0 8px 38px rgba(0,0,0,0.84);
+  --shadow-purple:   0 4px 22px rgba(34,211,238,0.28);
+  --shadow-red:      0 4px 16px rgba(248,113,113,0.26);
+  --nav-bg:          rgba(1,3,12,0.92);
+  --header-bg:       rgba(1,3,12,0.94);
+  --page-header-bg:  rgba(1,3,12,0.92);
+  --hero-glow-color: rgba(34,211,238,0.20);
+}
+
+/* ── Moonlight ───────────────────────────────────────────────────────────── */
+/*    Silver moon over a still landscape — stars drift in a lavender sky      */
+
+[data-theme="moonlight"] {
+  color-scheme: dark;
+  background:
+    /* Stars — tiled single-pixel dots at varied sizes */
+    radial-gradient(circle, rgba(220,228,255,0.72) 1px, transparent 1px) 83px  147px / 311px 257px,
+    radial-gradient(circle, rgba(255,255,255,0.56) 1px, transparent 1px) 247px  89px / 419px 313px,
+    radial-gradient(circle, rgba(200,212,255,0.62) 1px, transparent 1px) 162px 301px / 347px 281px,
+    radial-gradient(circle, rgba(240,242,255,0.50) 1px, transparent 1px) 328px 178px / 283px 467px,
+    radial-gradient(circle, rgba(222,232,255,0.67) 1px, transparent 1px) 102px 392px / 431px 223px,
+    radial-gradient(circle, rgba(255,255,255,0.46) 1px, transparent 1px) 376px 258px / 197px 389px,
+    /* Moon glow */
+    radial-gradient(circle at 28% 16%, rgba(255,255,255,0.22) 0%, rgba(220,222,255,0.10) 9%, transparent 24%),
+    radial-gradient(circle at 28% 20%, rgba(180,183,255,0.10) 0%, transparent 32%),
+    radial-gradient(ellipse at 28% 23%, rgba(150,158,255,0.08) 0%, transparent 42%),
+    /* Depth */
+    radial-gradient(ellipse at 70% 52%, rgba(18,18,60,0.52) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 112%, rgba(8,8,38,0.88) 0%, transparent 42%),
+    linear-gradient(180deg, #050514 0%, #080820 26%, #0c0c2a 54%, #07071c 80%, #040412 100%);
+
+  --bg:              transparent;
+  --surface:         rgba(7,7,26,0.64);
+  --surface-2:       rgba(10,10,34,0.50);
+  --surface-3:       rgba(14,14,44,0.40);
+  --border:          rgba(165,180,252,0.09);
+  --border-strong:   rgba(165,180,252,0.18);
+  --text:            #f0f0ff;
+  --text-2:          #cdd2fc;
+  --muted:           #a5b4fc;
+  --dimmed:          #282c5e;
+  --blue:            #a78bfa;
+  --blue-dark:       #8b5cf6;
+  --blue-light:      rgba(167,139,250,0.14);
+  --cyan:            #c4b5fd;
+  --cyan-dim:        rgba(196,181,253,0.12);
+  --purple:          #a78bfa;
+  --purple-light:    rgba(167,139,250,0.10);
+  --purple-glow:     rgba(167,139,250,0.38);
+  --green:           #34d399;
+  --green-light:     rgba(52,211,153,0.14);
+  --green-glow:      rgba(52,211,153,0.32);
+  --red:             #f87171;
+  --red-dark:        #ef4444;
+  --red-light:       rgba(248,113,113,0.14);
+  --red-glow:        rgba(248,113,113,0.28);
+  --amber:           #fcd34d;
+  --amber-light:     rgba(252,211,77,0.12);
+  --shadow:          0 2px 14px rgba(0,0,0,0.80);
+  --shadow-md:       0 8px 38px rgba(0,0,0,0.84);
+  --shadow-purple:   0 4px 22px rgba(167,139,250,0.32);
+  --shadow-red:      0 4px 16px rgba(248,113,113,0.26);
+  --nav-bg:          rgba(3,3,16,0.92);
+  --header-bg:       rgba(3,3,16,0.94);
+  --page-header-bg:  rgba(3,3,16,0.92);
+  --hero-glow-color: rgba(167,139,250,0.24);
+}
+
+/* ── Sunset Beach ────────────────────────────────────────────────────────── */
+/*    Warm coral horizon fading into dark ocean — sun just below the water    */
+
+[data-theme="sunset-beach"] {
+  color-scheme: dark;
+  background:
+    radial-gradient(ellipse at 62% 26%, rgba(255,96,28,0.40) 0%, transparent 44%),
+    radial-gradient(ellipse at 58% 23%, rgba(255,192,56,0.22) 0%, transparent 28%),
+    radial-gradient(ellipse at 64% 30%, rgba(220,58,18,0.28) 0%, transparent 38%),
+    radial-gradient(ellipse at 18% 56%, rgba(182,52,14,0.22) 0%, transparent 38%),
+    radial-gradient(ellipse at 88% 64%, rgba(120,38,10,0.18) 0%, transparent 34%),
+    radial-gradient(ellipse at 50% 92%, rgba(48,18,6,0.72) 0%, transparent 48%),
+    linear-gradient(180deg, #050202 0%, #140805 16%, #1e0e06 35%, #140a05 55%, #070404 78%, #020202 100%);
+
+  --bg:              transparent;
+  --surface:         rgba(16,6,3,0.65);
+  --surface-2:       rgba(22,10,4,0.52);
+  --surface-3:       rgba(28,13,5,0.42);
+  --border:          rgba(251,146,60,0.09);
+  --border-strong:   rgba(251,146,60,0.18);
   --text:            #fff8f0;
   --text-2:          #fde8cc;
   --muted:           #fb923c;
-  --dimmed:          #78350f;
+  --dimmed:          #7c3310;
   --blue:            #f97316;
   --blue-dark:       #ea580c;
-  --blue-light:      rgba(249, 115, 22, 0.13);
+  --blue-light:      rgba(249,115,22,0.14);
   --cyan:            #fbbf24;
-  --cyan-dim:        rgba(251, 191, 36, 0.12);
+  --cyan-dim:        rgba(251,191,36,0.12);
   --purple:          #f97316;
-  --purple-light:    rgba(249, 115, 22, 0.10);
-  --purple-glow:     rgba(249, 115, 22, 0.40);
-  --shadow:          0 2px 8px rgba(0, 0, 0, 0.65);
-  --shadow-md:       0 8px 32px rgba(0, 0, 0, 0.78);
-  --shadow-purple:   0 4px 20px rgba(249, 115, 22, 0.32);
-  --nav-bg:          rgba(13, 8, 4, 0.97);
-  --header-bg:       #0d0804;
-  --page-header-bg:  rgba(13, 8, 4, 0.97);
-  --hero-glow-color: rgba(249, 115, 22, 0.18);
+  --purple-light:    rgba(249,115,22,0.10);
+  --purple-glow:     rgba(249,115,22,0.40);
+  --green:           #34d399;
+  --green-light:     rgba(52,211,153,0.14);
+  --green-glow:      rgba(52,211,153,0.32);
+  --red:             #f87171;
+  --red-dark:        #ef4444;
+  --red-light:       rgba(248,113,113,0.14);
+  --red-glow:        rgba(248,113,113,0.28);
+  --amber:           #fcd34d;
+  --amber-light:     rgba(252,211,77,0.12);
+  --shadow:          0 2px 14px rgba(0,0,0,0.80);
+  --shadow-md:       0 8px 38px rgba(0,0,0,0.84);
+  --shadow-purple:   0 4px 22px rgba(249,115,22,0.30);
+  --shadow-red:      0 4px 16px rgba(248,113,113,0.26);
+  --nav-bg:          rgba(6,2,1,0.93);
+  --header-bg:       rgba(6,2,1,0.95);
+  --page-header-bg:  rgba(6,2,1,0.93);
+  --hero-glow-color: rgba(249,115,22,0.24);
+}
+
+/* ── Aurora ──────────────────────────────────────────────────────────────── */
+/*    Arctic night — curtains of green, teal and violet light the darkness    */
+
+[data-theme="aurora"] {
+  color-scheme: dark;
+  background:
+    /* Dim stars peeking through the aurora */
+    radial-gradient(circle, rgba(255,255,255,0.46) 1px, transparent 1px) 127px  83px / 347px 293px,
+    radial-gradient(circle, rgba(200,255,228,0.38) 1px, transparent 1px) 280px 167px / 419px 247px,
+    radial-gradient(circle, rgba(255,255,255,0.34) 1px, transparent 1px)  94px 310px / 257px 431px,
+    /* Aurora ribbons */
+    radial-gradient(ellipse at 68% 20%, rgba(0,228,112,0.24) 0%, transparent 40%),
+    radial-gradient(ellipse at 32% 36%, rgba(100,50,228,0.20) 0%, transparent 38%),
+    radial-gradient(ellipse at 58% 36%, rgba(0,196,218,0.17) 0%, transparent 36%),
+    radial-gradient(ellipse at 82% 50%, rgba(42,206,124,0.14) 0%, transparent 32%),
+    radial-gradient(ellipse at 14% 60%, rgba(80,30,190,0.14) 0%, transparent 34%),
+    radial-gradient(ellipse at 46% 62%, rgba(0,160,180,0.10) 0%, transparent 30%),
+    linear-gradient(180deg, #010307 0%, #020509 26%, #03070e 54%, #020608 80%, #010305 100%);
+
+  --bg:              transparent;
+  --surface:         rgba(2,5,10,0.65);
+  --surface-2:       rgba(3,8,14,0.52);
+  --surface-3:       rgba(4,10,18,0.42);
+  --border:          rgba(52,211,153,0.08);
+  --border-strong:   rgba(52,211,153,0.16);
+  --text:            #eefff8;
+  --text-2:          #a5f3d0;
+  --muted:           #34d399;
+  --dimmed:          #183d30;
+  --blue:            #2dd4bf;
+  --blue-dark:       #0d9488;
+  --blue-light:      rgba(45,212,191,0.14);
+  --cyan:            #6ee7b7;
+  --cyan-dim:        rgba(110,231,183,0.12);
+  --purple:          #a78bfa;
+  --purple-light:    rgba(167,139,250,0.10);
+  --purple-glow:     rgba(45,212,191,0.38);
+  --green:           #10b981;
+  --green-light:     rgba(16,185,129,0.14);
+  --green-glow:      rgba(16,185,129,0.35);
+  --red:             #f87171;
+  --red-dark:        #ef4444;
+  --red-light:       rgba(248,113,113,0.14);
+  --red-glow:        rgba(248,113,113,0.28);
+  --amber:           #fcd34d;
+  --amber-light:     rgba(252,211,77,0.12);
+  --shadow:          0 2px 14px rgba(0,0,0,0.82);
+  --shadow-md:       0 8px 38px rgba(0,0,0,0.86);
+  --shadow-purple:   0 4px 22px rgba(45,212,191,0.28);
+  --shadow-red:      0 4px 16px rgba(248,113,113,0.26);
+  --nav-bg:          rgba(1,2,5,0.92);
+  --header-bg:       rgba(1,2,5,0.94);
+  --page-header-bg:  rgba(1,2,5,0.92);
+  --hero-glow-color: rgba(45,212,191,0.22);
+}
+
+/* ── Starfield ───────────────────────────────────────────────────────────── */
+/*    Deep space — cosmic nebula clouds glow behind a field of distant stars  */
+
+[data-theme="starfield"] {
+  color-scheme: dark;
+  background:
+    /* Stars — tiled at prime-ish sizes so they don't visibly repeat */
+    radial-gradient(circle, rgba(255,255,255,0.94) 1px, transparent 1px)  43px 127px / 217px 311px,
+    radial-gradient(circle, rgba(255,255,255,0.80) 1px, transparent 1px) 187px  67px / 347px 271px,
+    radial-gradient(circle, rgba(200,218,255,0.86) 1px, transparent 1px)  92px 234px / 283px 389px,
+    radial-gradient(circle, rgba(255,255,255,0.70) 1px, transparent 1px) 315px  48px / 421px 197px,
+    radial-gradient(circle, rgba(255,244,200,0.84) 1px, transparent 1px)  78px 189px / 163px 443px,
+    radial-gradient(circle, rgba(255,255,255,0.66) 1px, transparent 1px) 226px 143px / 307px 251px,
+    radial-gradient(circle, rgba(200,228,255,0.76) 1px, transparent 1px) 148px 310px / 179px 337px,
+    radial-gradient(circle, rgba(255,255,255,0.58) 1px, transparent 1px)  62px 401px / 457px 167px,
+    radial-gradient(circle, rgba(255,255,255,0.92) 1px, transparent 1px) 334px 280px / 239px 373px,
+    radial-gradient(circle, rgba(200,212,255,0.66) 1px, transparent 1px) 170px 350px / 193px 457px,
+    radial-gradient(circle, rgba(255,255,255,0.78) 1px, transparent 1px) 290px 190px / 361px 293px,
+    radial-gradient(circle, rgba(180,202,255,0.72) 1px, transparent 1px) 110px 460px / 443px 211px,
+    /* Nebula clouds */
+    radial-gradient(ellipse at 38% 28%, rgba(100,40,182,0.28) 0%, transparent 48%),
+    radial-gradient(ellipse at 76% 52%, rgba(40,70,162,0.22) 0%, transparent 40%),
+    radial-gradient(ellipse at 14% 64%, rgba(80,20,122,0.18) 0%, transparent 36%),
+    radial-gradient(ellipse at 58% 80%, rgba(20,46,102,0.22) 0%, transparent 40%),
+    radial-gradient(ellipse at 92% 18%, rgba(60,20,102,0.16) 0%, transparent 32%),
+    linear-gradient(180deg, #000000 0%, #020108 30%, #03020c 58%, #020108 84%, #000000 100%);
+
+  --bg:              transparent;
+  --surface:         rgba(5,3,14,0.66);
+  --surface-2:       rgba(9,5,20,0.52);
+  --surface-3:       rgba(13,7,28,0.42);
+  --border:          rgba(139,92,246,0.09);
+  --border-strong:   rgba(139,92,246,0.18);
+  --text:            #f4f0ff;
+  --text-2:          #d0c6fc;
+  --muted:           #9d7de8;
+  --dimmed:          #2c1e54;
+  --blue:            #a855f7;
+  --blue-dark:       #9333ea;
+  --blue-light:      rgba(168,85,247,0.14);
+  --cyan:            #c084fc;
+  --cyan-dim:        rgba(192,132,252,0.12);
+  --purple:          #a855f7;
+  --purple-light:    rgba(168,85,247,0.10);
+  --purple-glow:     rgba(168,85,247,0.40);
+  --green:           #34d399;
+  --green-light:     rgba(52,211,153,0.14);
+  --green-glow:      rgba(52,211,153,0.32);
+  --red:             #f87171;
+  --red-dark:        #ef4444;
+  --red-light:       rgba(248,113,113,0.14);
+  --red-glow:        rgba(248,113,113,0.28);
+  --amber:           #fcd34d;
+  --amber-light:     rgba(252,211,77,0.12);
+  --shadow:          0 2px 14px rgba(0,0,0,0.86);
+  --shadow-md:       0 8px 38px rgba(0,0,0,0.90);
+  --shadow-purple:   0 4px 22px rgba(168,85,247,0.34);
+  --shadow-red:      0 4px 16px rgba(248,113,113,0.26);
+  --nav-bg:          rgba(0,0,3,0.92);
+  --header-bg:       rgba(0,0,3,0.96);
+  --page-header-bg:  rgba(0,0,3,0.92);
+  --hero-glow-color: rgba(168,85,247,0.26);
 }
