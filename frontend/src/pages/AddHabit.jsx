@@ -112,7 +112,7 @@ export default function AddHabit() {
   const addedCount  = added.size;
 
   return (
-    <div className="page" style={{ paddingBottom: addedCount > 0 ? 108 : 32 }}>
+    <div className="page" style={addedCount > 0 ? { paddingBottom: 'calc(136px + var(--sab))' } : undefined}>
       {/* Header */}
       <div className="page-header">
         <div className="page-title">add a habit ✨</div>
