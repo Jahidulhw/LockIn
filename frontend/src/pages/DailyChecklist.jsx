@@ -29,34 +29,27 @@ function TrashIcon() {
   );
 }
 
-const NOTE_PLACEHOLDERS = [
-  'how was today? 💭',
-  'felt great today 💪',
-  'anything on your mind...',
-  'quick thought for today...',
-  'how did it feel?',
-];
-
 export default function DailyChecklist() {
   const { day: dayParam } = useParams();
   const navigate = useNavigate();
-  const { activeChallenge, toggleHabit, deleteHabit, saveNote, loading } = useApp();
+  const {
+    activeChallenge, toggleHabit, deleteHabit, loading,
+    addChecklistItem, toggleChecklistItem, deleteChecklistItem,
+  } = useApp();
 
   const togglingRef = useRef(new Set());
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [deleting, setDeleting]       = useState(false);
   const [toast, setToast]             = useState('');
-  const [noteText, setNoteText]       = useState('');
-  const [noteStatus, setNoteStatus]   = useState('idle'); // 'idle' | 'saving' | 'saved'
+  const [newItemText, setNewItemText] = useState('');
+  const [addingItem, setAddingItem]   = useState(false);
+  const togglingItemRef = useRef(new Set());
 
-  const toastTimer   = useRef(null);
-  const noteDebounce = useRef(null);
-  const notePlaceholder = useRef(NOTE_PLACEHOLDERS[Math.floor(Math.random() * NOTE_PLACEHOLDERS.length)]);
+  const toastTimer = useRef(null);
 
   // cleanup timers on unmount
   useEffect(() => () => {
     clearTimeout(toastTimer.current);
-    clearTimeout(noteDebounce.current);
   }, []);
 
   const currentDay = activeChallenge
@@ -66,16 +59,6 @@ export default function DailyChecklist() {
   const date = activeChallenge
     ? getDayDate(activeChallenge.startDate, currentDay)
     : '';
-
-  // Load note for this day whenever the day or challenge changes
-  useEffect(() => {
-    clearTimeout(noteDebounce.current);
-    setNoteStatus('idle');
-    if (!activeChallenge || !date) return;
-    const note = activeChallenge.notes?.find((n) => n.date === date);
-    setNoteText(note?.text || '');
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [date, activeChallenge?._id]);
 
   const showToast = (msg) => {
     setToast(msg);
@@ -117,20 +100,40 @@ export default function DailyChecklist() {
     }
   }, [activeChallenge, confirmDelete, deleteHabit, deleting]);
 
-  const handleNoteChange = useCallback((text) => {
-    setNoteText(text);
-    setNoteStatus('saving');
-    clearTimeout(noteDebounce.current);
-    noteDebounce.current = setTimeout(async () => {
-      try {
-        await saveNote(activeChallenge._id, date, text);
-        setNoteStatus('saved');
-        setTimeout(() => setNoteStatus('idle'), 1800);
-      } catch {
-        setNoteStatus('idle');
-      }
-    }, 600);
-  }, [activeChallenge, date, saveNote]);
+  const handleAddItem = useCallback(async () => {
+    const text = newItemText.trim();
+    if (!text || !activeChallenge || addingItem) return;
+    setAddingItem(true);
+    try {
+      await addChecklistItem(activeChallenge._id, text);
+      setNewItemText('');
+    } catch (err) {
+      console.error('Add checklist item failed', err);
+    } finally {
+      setAddingItem(false);
+    }
+  }, [activeChallenge, newItemText, addingItem, addChecklistItem]);
+
+  const handleToggleItem = useCallback(async (itemId) => {
+    if (!activeChallenge || togglingItemRef.current.has(itemId)) return;
+    togglingItemRef.current.add(itemId);
+    try {
+      await toggleChecklistItem(activeChallenge._id, itemId);
+    } catch (err) {
+      console.error('Toggle checklist item failed', err);
+    } finally {
+      togglingItemRef.current.delete(itemId);
+    }
+  }, [activeChallenge, toggleChecklistItem]);
+
+  const handleDeleteItem = useCallback(async (itemId) => {
+    if (!activeChallenge) return;
+    try {
+      await deleteChecklistItem(activeChallenge._id, itemId);
+    } catch (err) {
+      console.error('Delete checklist item failed', err);
+    }
+  }, [activeChallenge, deleteChecklistItem]);
 
   if (loading) {
     return <div className="page"><div className="loading-wrap"><div className="spinner" /></div></div>;
@@ -147,11 +150,10 @@ export default function DailyChecklist() {
     );
   }
 
-  const today       = new Date().toISOString().split('T')[0];
-  const isFuture    = date > today;
   const todayDay    = getCurrentDay(activeChallenge.startDate);
   const dayEntry    = activeChallenge.completions?.find((c) => c.date === date);
   const habits      = activeChallenge.habits || [];
+  const checklist   = activeChallenge.checklist || [];
   const completedCount = dayEntry ? dayEntry.habits.filter((h) => h.completed).length : 0;
   const totalCount  = habits.length;
   const pct         = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
@@ -242,22 +244,66 @@ export default function DailyChecklist() {
         })}
       </div>
 
-      {/* Notes */}
+      {/* Checklist */}
       <div className="card">
-        <div className="note-header">
-          <span className="note-label">notes</span>
-          <span className={`note-status ${noteStatus !== 'idle' ? noteStatus : ''}`}>
-            {noteStatus === 'saving' ? 'saving…' : noteStatus === 'saved' ? 'saved ✓' : ''}
-          </span>
+        <div className="card-title">checklist</div>
+
+        {checklist.length === 0 && (
+          <div className="empty-state" style={{ padding: '20px 0' }}>
+            <div className="empty-state-icon">✅</div>
+            <div className="empty-state-text">no items yet — add one below</div>
+          </div>
+        )}
+
+        {checklist.map((item) => (
+          <div
+            key={item.id}
+            className="habit-item"
+            onClick={() => handleToggleItem(item.id)}
+            role="checkbox"
+            aria-checked={item.done}
+            tabIndex={0}
+            onKeyDown={(e) => e.key === ' ' && handleToggleItem(item.id)}
+          >
+            <div className={`habit-checkbox ${item.done ? 'checked' : ''}`}>
+              {item.done && (
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <path d="M2 7l4 4 6-6" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              )}
+            </div>
+            <span className={`habit-name ${item.done ? 'done' : ''}`}>{item.text}</span>
+            <button
+              className="habit-delete-btn"
+              onClick={(e) => { e.stopPropagation(); handleDeleteItem(item.id); }}
+              aria-label={`Delete ${item.text}`}
+              tabIndex={-1}
+            >
+              <TrashIcon />
+            </button>
+          </div>
+        ))}
+
+        <div className="checklist-add-row">
+          <input
+            className="focus-input"
+            style={{ fontSize: 14, padding: '11px 14px' }}
+            type="text"
+            placeholder="add an item..."
+            value={newItemText}
+            onChange={(e) => setNewItemText(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleAddItem()}
+            maxLength={120}
+          />
+          <button
+            className="btn btn-primary btn-sm"
+            style={{ flexShrink: 0 }}
+            disabled={!newItemText.trim() || addingItem}
+            onClick={handleAddItem}
+          >
+            {addingItem ? '…' : 'add'}
+          </button>
         </div>
-        <textarea
-          className="note-input"
-          placeholder={isFuture ? 'plan ahead... 📝' : notePlaceholder.current}
-          value={noteText}
-          onChange={(e) => handleNoteChange(e.target.value)}
-          maxLength={500}
-          rows={3}
-        />
       </div>
 
       {/* Completion celebration */}

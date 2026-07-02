@@ -161,8 +161,38 @@ export function AppProvider({ children }) {
     return updated;
   }, [setChallengesAndCache]);
 
-  const saveNote = useCallback(async (challengeId, date, text) => {
-    const updated = await api.saveNote(challengeId, date, text);
+  const addChecklistItem = useCallback(async (challengeId, text) => {
+    const updated = await api.addChecklistItem(challengeId, text);
+    setChallengesAndCache((prev) => prev.map((c) => (c._id === challengeId ? updated : c)));
+    setActiveChallengeState((prev) => (prev?._id === challengeId ? updated : prev));
+    return updated;
+  }, [setChallengesAndCache]);
+
+  const toggleChecklistItem = useCallback(async (challengeId, itemId) => {
+    function applyToggle(challenge) {
+      if (challenge._id !== challengeId) return challenge;
+      const checklist = (challenge.checklist || []).map((item) =>
+        item.id === itemId ? { ...item, done: !item.done } : item
+      );
+      return { ...challenge, checklist };
+    }
+    // Optimistic update
+    setChallenges((prev) => prev.map(applyToggle));
+    setActiveChallengeState((prev) => (prev ? applyToggle(prev) : null));
+
+    try {
+      const updated = await api.toggleChecklistItem(challengeId, itemId);
+      setChallengesAndCache((prev) => prev.map((c) => (c._id === challengeId ? updated : c)));
+      setActiveChallengeState((prev) => (prev?._id === challengeId ? updated : prev));
+      return updated;
+    } catch (err) {
+      loadChallenges({ background: true });
+      throw err;
+    }
+  }, [setChallengesAndCache, loadChallenges]);
+
+  const deleteChecklistItem = useCallback(async (challengeId, itemId) => {
+    const updated = await api.deleteChecklistItem(challengeId, itemId);
     setChallengesAndCache((prev) => prev.map((c) => (c._id === challengeId ? updated : c)));
     setActiveChallengeState((prev) => (prev?._id === challengeId ? updated : prev));
     return updated;
@@ -191,7 +221,9 @@ export function AppProvider({ children }) {
         toggleHabit,
         addHabit,
         deleteHabit,
-        saveNote,
+        addChecklistItem,
+        toggleChecklistItem,
+        deleteChecklistItem,
         deleteChallenge,
         reload: loadChallenges
       }}

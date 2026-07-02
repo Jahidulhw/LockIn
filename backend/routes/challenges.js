@@ -77,7 +77,7 @@ router.post('/', async (req, res) => {
       endDate: computeEndDate(startDate),
       habits: processedHabits,
       completions: [],
-      notes: [],
+      checklist: [],
       plantType,
       plantRarity,
       createdAt: new Date().toISOString()
@@ -284,31 +284,53 @@ router.delete('/:id/habits/:habitId', async (req, res) => {
   }
 });
 
-// POST /api/challenges/:id/notes
-router.post('/:id/notes', async (req, res) => {
+// POST /api/challenges/:id/checklist  (add checklist item)
+router.post('/:id/checklist', async (req, res) => {
   try {
-    const { date, text } = req.body;
-    if (!date) return res.status(400).json({ error: 'date is required' });
+    const { text } = req.body;
+    const trimmed = (text || '').trim();
+    if (!trimmed) return res.status(400).json({ error: 'text is required' });
 
     const owned = await getOwned(req.params.id, req.user.id);
     if (!owned) return res.status(404).json({ error: 'Challenge not found' });
 
-    let notes = [...(owned.obj.notes || [])];
-    const trimmed = (text || '').trim();
+    const checklist = [...(owned.obj.checklist || []), {
+      id: generateId(),
+      text: trimmed,
+      done: false
+    }];
+    await CHALLENGES.doc(req.params.id).update({ checklist });
+    res.json({ ...owned.obj, checklist });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
-    if (!trimmed) {
-      notes = notes.filter((n) => n.date !== date);
-    } else {
-      const idx = notes.findIndex((n) => n.date === date);
-      if (idx === -1) {
-        notes.push({ date, text: trimmed });
-      } else {
-        notes[idx] = { date, text: trimmed };
-      }
-    }
+// POST /api/challenges/:id/checklist/:itemId/toggle
+router.post('/:id/checklist/:itemId/toggle', async (req, res) => {
+  try {
+    const owned = await getOwned(req.params.id, req.user.id);
+    if (!owned) return res.status(404).json({ error: 'Challenge not found' });
 
-    await CHALLENGES.doc(req.params.id).update({ notes });
-    res.json({ ...owned.obj, notes });
+    const checklist = (owned.obj.checklist || []).map((item) =>
+      item.id === req.params.itemId ? { ...item, done: !item.done } : item
+    );
+    await CHALLENGES.doc(req.params.id).update({ checklist });
+    res.json({ ...owned.obj, checklist });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// DELETE /api/challenges/:id/checklist/:itemId
+router.delete('/:id/checklist/:itemId', async (req, res) => {
+  try {
+    const owned = await getOwned(req.params.id, req.user.id);
+    if (!owned) return res.status(404).json({ error: 'Challenge not found' });
+
+    const checklist = (owned.obj.checklist || []).filter((item) => item.id !== req.params.itemId);
+    await CHALLENGES.doc(req.params.id).update({ checklist });
+    res.json({ ...owned.obj, checklist });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

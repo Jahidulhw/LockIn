@@ -66,8 +66,14 @@ export const deleteHabit = (challengeId, habitId) =>
 export const deleteChallenge = (id) =>
   fetchJSON(`/api/challenges/${id}`, { method: 'DELETE' });
 
-export const saveNote = (challengeId, date, text) =>
-  fetchJSON(`/api/challenges/${challengeId}/notes`, {
+export const addChecklistItem = (challengeId, text) =>
+  fetchJSON(`/api/challenges/${challengeId}/checklist`, {
     method: 'POST',
-    body: JSON.stringify({ date, text })
+    body: JSON.stringify({ text })
   });
+
+export const toggleChecklistItem = (challengeId, itemId) =>
+  fetchJSON(`/api/challenges/${challengeId}/checklist/${itemId}/toggle`, { method: 'POST' });
+
+export const deleteChecklistItem = (challengeId, itemId) =>
+  fetchJSON(`/api/challenges/${challengeId}/checklist/${itemId}`, { method: 'DELETE' });
