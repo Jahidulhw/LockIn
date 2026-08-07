@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
@@ -121,6 +121,16 @@ export default function Home() {
   const [showResetModal, setShowResetModal]   = useState(false);
   const [resetting, setResetting]             = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
+  const [toast, setToast]                     = useState('');
+  const toastTimer = useRef(null);
+
+  useEffect(() => () => clearTimeout(toastTimer.current), []);
+
+  function showToast(msg) {
+    setToast(msg);
+    clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(''), 2500);
+  }
 
   useEffect(() => {
     if (!activeChallenge) return;
@@ -141,8 +151,9 @@ export default function Home() {
       await resetChallenge(activeChallenge._id);
       await reload();
       setShowResetModal(false);
-    } catch {
-      alert('Failed to reset. Try again.');
+    } catch (err) {
+      console.error('Reset failed:', err);
+      showToast(err?.message ? `reset failed: ${err.message}` : 'reset failed — try again');
     } finally {
       setResetting(false);
     }
@@ -326,6 +337,8 @@ export default function Home() {
             </div>
           </div>
         )}
+
+        <div className={`toast ${toast ? 'show' : ''}`}>{toast}</div>
       </div>
     </div>
   );
