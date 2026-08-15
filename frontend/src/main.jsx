@@ -9,7 +9,10 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   </React.StrictMode>
 );
 
-if ('serviceWorker' in navigator) {
+// Register service worker only in browser/PWA context — skip inside Capacitor native shell
+const isCapacitor = window.Capacitor?.isNativePlatform?.() ?? false;
+
+if (!isCapacitor && 'serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').catch(() => {});
   });

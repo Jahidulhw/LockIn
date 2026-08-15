@@ -2,23 +2,56 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <!-- viewport-fit=cover is required for iPhone notch / Dynamic Island safe areas -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+
+    <!-- Theme / status bar -->
     <meta name="theme-color" content="#5b21b6" />
+
+    <!-- iOS PWA / Capacitor meta tags -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="LockIn" />
+    <meta name="mobile-web-app-capable" content="yes" />
+
+    <!-- iOS touch icons — must be PNG, not SVG -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/icon-180.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="/icon-152.png" />
+    <link rel="apple-touch-icon" sizes="167x167" href="/icon-167.png" />
+    <link rel="apple-touch-icon" sizes="120x120" href="/icon-120.png" />
+    <link rel="apple-touch-icon" sizes="76x76"   href="/icon-76.png" />
+
+    <!-- iOS splash / startup image color -->
+    <meta name="msapplication-TileColor" content="#5b21b6" />
+
     <title>LockIn</title>
     <link rel="manifest" href="/manifest.json" />
-    <link rel="icon" type="image/svg+xml" href="/icon-512.svg" />
-    <link rel="apple-touch-icon" href="/icon-192.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"></noscript>
+    <link rel="icon" type="image/png" href="/icon-192.png" />
+
+    <!-- Fonts: preconnect first, then non-blocking load -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+      media="print"
+      onload="this.media='all'"
+    />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
   </head>
   <body>
+    <!-- Inline theme restore — runs before first paint to avoid flash -->
     <script>
-      (function(){var v=['dark-forest','midnight-ocean','moonlight','sunset-beach','aurora','starfield'];var t=localStorage.getItem('lockin_theme');document.documentElement.setAttribute('data-theme',v.includes(t)?t:'starfield');})();
+      (function () {
+        var valid = ['dark-forest', 'midnight-ocean', 'moonlight', 'sunset-beach', 'aurora', 'starfield'];
+        var t = localStorage.getItem('lockin_theme');
+        document.documentElement.setAttribute('data-theme', valid.includes(t) ? t : 'starfield');
+      })();
     </script>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
