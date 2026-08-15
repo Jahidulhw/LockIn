@@ -16,8 +16,14 @@ function getDayIndex(startDateStr) {
   return Math.min(Math.max(diff + 1, 1), 30);
 }
 
+// Bug fix: toISOString() returns UTC date which is wrong for users east/west of UTC.
+// Always derive date strings from local calendar time.
+function toLocalDateStr(d) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
 function getTodayStats(challenge) {
-  const today = new Date().toISOString().split('T')[0];
+  const today = toLocalDateStr(new Date());
   const dayEntry = challenge.completions?.find((c) => c.date === today);
   const total = challenge.habits?.length || 0;
   const completed = dayEntry ? dayEntry.habits.filter((h) => h.completed).length : 0;
@@ -32,7 +38,7 @@ function calcStreak(challenge) {
   for (let i = 0; i < 30; i++) {
     const d = new Date(today);
     d.setDate(d.getDate() - i);
-    const dateStr = d.toISOString().split('T')[0];
+    const dateStr = toLocalDateStr(d);
     const entry = challenge.completions?.find((c) => c.date === dateStr);
     const done = entry ? entry.habits.filter((h) => h.completed).length : 0;
     if (done === total) { streak++; } else if (i > 0) { break; }

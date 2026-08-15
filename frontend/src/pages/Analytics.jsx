@@ -10,8 +10,13 @@ function shortDate(dateStr) {
   });
 }
 
+// Bug fix: toISOString() returns UTC date, wrong for non-UTC users.
+function toLocalDateStr(d) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
 function CalendarGrid({ dailyHistory, onDayClick }) {
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = toLocalDateStr(new Date());
 
   return (
     <div className="cal30-grid">
@@ -113,10 +118,10 @@ export default function Analytics() {
 
   const { dailyHistory, habitStats } = data;
 
-  // habitStats is already sorted high→low by the backend
-  const half      = Math.ceil(habitStats.length / 2);
-  const crushing  = habitStats.slice(0, half);
-  const needsWork = habitStats.slice(half).reverse(); // worst first
+  // Bug fix: previously split array in half regardless of actual rates, so a habit
+  // at 0% could appear in "crushing it". Now use 50% as the real threshold.
+  const crushing  = habitStats.filter((h) => h.completionRate >= 50);
+  const needsWork = habitStats.filter((h) => h.completionRate < 50).reverse(); // worst first
 
   return (
     <div className="page">

@@ -20,13 +20,19 @@ function getCurrentDay(startDateStr) {
   return Math.min(Math.max(diff + 1, 1), 30);
 }
 
+// Bug fix: toISOString() returns UTC date, which is wrong for non-UTC users.
+// Use local calendar date instead.
+function toLocalDateStr(d) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
 function getOverallPct(challenge) {
   const day = getCurrentDay(challenge.startDate);
   let total = 0, done = 0;
   for (let i = 0; i < day; i++) {
     const d = new Date(challenge.startDate + 'T00:00:00');
     d.setDate(d.getDate() + i);
-    const dateStr = d.toISOString().split('T')[0];
+    const dateStr = toLocalDateStr(d);
     const entry = challenge.completions?.find((c) => c.date === dateStr);
     total += challenge.habits?.length || 0;
     done += entry ? entry.habits.filter((h) => h.completed).length : 0;
@@ -68,6 +74,8 @@ export default function Challenges() {
       showToast('run deleted ✓');
     } catch (err) {
       console.error('Delete failed', err);
+      // Bug fix: previously the modal stayed open with no feedback on failure
+      showToast('delete failed — try again');
     } finally {
       setDeleting(false);
     }

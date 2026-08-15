@@ -337,6 +337,8 @@ export default function Focus() {
 
   function handleStart() {
     if (!activity.trim()) return;
+    // Bug fix: clear any existing interval first to prevent duplicate timers on double-tap
+    clearInterval(timerRef.current);
     setRemaining(goalSeconds);
     setPhase('running');
     setConfirmQuit(false);
@@ -352,6 +354,8 @@ export default function Focus() {
   }
 
   function handleResume() {
+    // Bug fix: clear any stale interval before starting a new one
+    clearInterval(timerRef.current);
     setPhase('running');
     timerRef.current = setInterval(() => {
       setRemaining((r) => Math.max(0, r - 1));

@@ -120,12 +120,18 @@ router.put('/:id', async (req, res) => {
 router.post('/:id/habits/:habitId/complete', async (req, res) => {
   try {
     const { date } = req.body;
-    if (!date) return res.status(400).json({ error: 'date is required' });
+    // Bug fix: validate date format and ensure it falls within the challenge window
+    if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      return res.status(400).json({ error: 'date must be YYYY-MM-DD' });
+    }
 
     const owned = await getOwned(req.params.id, req.user.id);
     if (!owned) return res.status(404).json({ error: 'Challenge not found' });
 
     const { obj } = owned;
+    if (date < obj.startDate || date > obj.endDate) {
+      return res.status(400).json({ error: 'date is outside the challenge window' });
+    }
     const habitExists = obj.habits.some((h) => h.id === req.params.habitId);
     if (!habitExists) return res.status(404).json({ error: 'Habit not found' });
 
@@ -276,9 +282,16 @@ router.delete('/:id/habits/:habitId', async (req, res) => {
     const owned = await getOwned(req.params.id, req.user.id);
     if (!owned) return res.status(404).json({ error: 'Challenge not found' });
 
-    const habits = owned.obj.habits.filter((h) => h.id !== req.params.habitId);
-    await CHALLENGES.doc(req.params.id).update({ habits });
-    res.json({ ...owned.obj, habits });
+    const { habitId } = req.params;
+    const habits = owned.obj.habits.filter((h) => h.id !== habitId);
+    // Bug fix: also strip the deleted habit from all past completion records,
+    // otherwise the completed count can exceed the habit count (>100% progress).
+    const completions = (owned.obj.completions || []).map((day) => ({
+      ...day,
+      habits: day.habits.filter((h) => h.habitId !== habitId),
+    }));
+    await CHALLENGES.doc(req.params.id).update({ habits, completions });
+    res.json({ ...owned.obj, habits, completions });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

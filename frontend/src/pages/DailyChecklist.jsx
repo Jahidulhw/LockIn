@@ -7,10 +7,16 @@ function formatDate(dateStr) {
   return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 }
 
+// Bug fix: toISOString() returns UTC, which produces wrong dates for non-UTC users.
+// Use local calendar date so stored completion dates match the user's actual day.
+function toLocalDateStr(d) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
 function getDayDate(startDateStr, dayIndex) {
   const d = new Date(startDateStr + 'T00:00:00');
   d.setDate(d.getDate() + dayIndex - 1);
-  return d.toISOString().split('T')[0];
+  return toLocalDateStr(d);
 }
 
 function getCurrentDay(startDateStr) {
@@ -182,7 +188,8 @@ export default function DailyChecklist() {
           <div className="day-date">{formatDate(date)}</div>
         </div>
 
-        <button className="arrow-btn" onClick={() => goToDay(currentDay + 1)} disabled={currentDay >= 30} aria-label="Next day">
+        {/* Bug fix: also disable when already on today — can't navigate to future days */}
+        <button className="arrow-btn" onClick={() => goToDay(currentDay + 1)} disabled={currentDay >= 30 || currentDay >= todayDay} aria-label="Next day">
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
             <path d="M8 4l6 6-6 6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
