@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
-import { resetChallenge } from '../api/client';
 import Header from '../components/Header';
 import CelebrationOverlay from '../components/CelebrationOverlay';
 import { triggerCelebration } from '../utils/celebration';
@@ -121,7 +120,7 @@ function HomeSkeleton() {
 }
 
 export default function Home() {
-  const { activeChallenge, loading, refreshing, error, reload } = useApp();
+  const { activeChallenge, loading, refreshing, error, reload, resetChallengeProgress } = useApp();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [showResetModal, setShowResetModal]   = useState(false);
@@ -154,8 +153,7 @@ export default function Home() {
   async function handleReset() {
     setResetting(true);
     try {
-      await resetChallenge(activeChallenge._id);
-      await reload();
+      await resetChallengeProgress(activeChallenge._id);
       setShowResetModal(false);
     } catch (err) {
       console.error('Reset failed:', err);
@@ -210,7 +208,7 @@ export default function Home() {
   const streak       = calcStreak(activeChallenge);
   const totalDone    = calcTotalCompleted(activeChallenge);
   const daysLeft     = 30 - day + 1;
-  const today        = new Date().toISOString().split('T')[0];
+  const today        = toLocalDateStr(new Date());
   const allDoneToday = todayStats.total > 0 && todayStats.completed === todayStats.total;
   const challengePct = Math.round((day / 30) * 100);
 

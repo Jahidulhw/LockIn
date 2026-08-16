@@ -208,6 +208,16 @@ export function AppProvider({ children }) {
     });
   }, [setChallengesAndCache]);
 
+  // Bug fix: previously Home called resetChallenge + reload() which caused a loading
+  // skeleton flash and a modal re-appear glitch. Now we update state from the API
+  // response directly, same as every other mutation in this context.
+  const resetChallengeProgress = useCallback(async (challengeId) => {
+    const updated = await api.resetChallenge(challengeId);
+    setChallengesAndCache((prev) => prev.map((c) => (c._id === challengeId ? updated : c)));
+    setActiveChallengeState((prev) => (prev?._id === challengeId ? updated : prev));
+    return updated;
+  }, [setChallengesAndCache]);
+
   return (
     <AppContext.Provider
       value={{
@@ -225,6 +235,7 @@ export function AppProvider({ children }) {
         toggleChecklistItem,
         deleteChecklistItem,
         deleteChallenge,
+        resetChallengeProgress,
         reload: loadChallenges
       }}
     >
