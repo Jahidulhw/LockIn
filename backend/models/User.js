@@ -30,6 +30,7 @@ async function updatePreferences(username, prefs) {
   for (const [k, v] of Object.entries(prefs)) {
     updates[`preferences.${k}`] = v;
   }
+  if (Object.keys(updates).length === 0) return;
   await USERS.doc(username).update(updates);
 }
 

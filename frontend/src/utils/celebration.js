@@ -36,6 +36,10 @@ export function playCelebrationSound() {
     [2093, 2637, 3136].forEach((freq, i) => {
       playNote(freq, chordStart + i * 0.06, 0.5, 0.07);
     });
+
+    // Release the context once every note has finished — otherwise each
+    // celebration leaks an AudioContext and browsers cap how many can be live.
+    setTimeout(() => ctx.close().catch(() => {}), 2500);
   } catch {
     // Audio blocked or not supported — silent fail
   }

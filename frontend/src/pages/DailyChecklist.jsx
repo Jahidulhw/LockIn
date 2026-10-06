@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
+import { calendarDaysBetween } from '../utils/dateMath';
 
 function formatDate(dateStr) {
   const d = new Date(dateStr + 'T00:00:00');
@@ -21,9 +22,7 @@ function getDayDate(startDateStr, dayIndex) {
 
 function getCurrentDay(startDateStr) {
   const start = new Date(startDateStr + 'T00:00:00');
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const diff = Math.floor((today - start) / 86400000);
+  const diff = calendarDaysBetween(start, new Date());
   return Math.min(Math.max(diff + 1, 1), 30);
 }
 

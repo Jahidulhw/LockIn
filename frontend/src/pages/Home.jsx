@@ -5,13 +5,11 @@ import { useAuth } from '../context/AuthContext';
 import Header from '../components/Header';
 import CelebrationOverlay from '../components/CelebrationOverlay';
 import { triggerCelebration } from '../utils/celebration';
+import { calendarDaysBetween } from '../utils/dateMath';
 
 function getDayIndex(startDateStr) {
   const start = new Date(startDateStr + 'T00:00:00');
-  start.setHours(0, 0, 0, 0);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const diff = Math.floor((today - start) / 86400000);
+  const diff = calendarDaysBetween(start, new Date());
   return Math.min(Math.max(diff + 1, 1), 30);
 }
 

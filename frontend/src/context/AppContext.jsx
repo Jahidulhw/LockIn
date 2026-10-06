@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import * as api from '../api/client';
 import { useAuth } from './AuthContext';
 
@@ -43,8 +43,14 @@ export function AppProvider({ children }) {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
 
+  // Bumped on every local mutation so an in-flight background fetch that
+  // started before the mutation can recognize its response is now stale and
+  // avoid clobbering the mutation's result when it resolves.
+  const mutationSeqRef = useRef(0);
+
   // Helper: update challenges + keep cache in sync
   const setChallengesAndCache = useCallback((updater) => {
+    mutationSeqRef.current++;
     setChallenges((prev) => {
       const next = typeof updater === 'function' ? updater(prev) : updater;
       if (userId) writeCache(userId, next);
@@ -68,6 +74,7 @@ export function AppProvider({ children }) {
 
   const loadChallenges = useCallback(async (opts = {}) => {
     const background = opts.background ?? false;
+    const seqAtStart = mutationSeqRef.current;
     if (background) {
       setRefreshing(true);
     } else {
@@ -76,7 +83,12 @@ export function AppProvider({ children }) {
     }
     try {
       const data = await api.getChallenges();
-      applyFreshData(data);
+      // If a mutation happened while this request was in flight, `data` was
+      // fetched before that mutation existed server-side — applying it here
+      // would resurrect state the mutation already corrected.
+      if (mutationSeqRef.current === seqAtStart) {
+        applyFreshData(data);
+      }
       if (!background) setError(null);
     } catch (err) {
       if (!background) setError(err.message);
@@ -133,6 +145,7 @@ export function AppProvider({ children }) {
       return { ...challenge, completions: completions.map((c, i) => i === dayIdx ? { ...c, habits: newHabits } : c) };
     }
     // Optimistic update
+    mutationSeqRef.current++;
     setChallenges((prev) => prev.map(applyToggle));
     setActiveChallengeState((prev) => prev ? applyToggle(prev) : null);
 
@@ -177,6 +190,7 @@ export function AppProvider({ children }) {
       return { ...challenge, checklist };
     }
     // Optimistic update
+    mutationSeqRef.current++;
     setChallenges((prev) => prev.map(applyToggle));
     setActiveChallengeState((prev) => (prev ? applyToggle(prev) : null));
 

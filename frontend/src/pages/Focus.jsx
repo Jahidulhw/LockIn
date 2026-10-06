@@ -88,6 +88,9 @@ function playDing() {
       osc.start(ctx.currentTime + t);
       osc.stop(ctx.currentTime + t + 2.5);
     });
+    // Release the context once the last tone finishes — otherwise each call
+    // leaks an AudioContext and browsers cap how many can be live at once.
+    setTimeout(() => ctx.close().catch(() => {}), 3000);
   } catch {}
 }
 
