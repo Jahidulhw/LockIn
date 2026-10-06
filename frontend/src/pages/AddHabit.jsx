@@ -85,6 +85,8 @@ export default function AddHabit() {
       await addHabit(activeChallenge._id, { name: `${emoji} ${name}` });
       setAdded((prev) => new Set([...prev, name]));
       showToast(`${emoji} added!`);
+    } catch (err) {
+      showToast(err.message || 'could not add habit — try again');
     } finally {
       setAdding(null);
     }
@@ -99,6 +101,8 @@ export default function AddHabit() {
       showToast('custom habit added! ✓');
       setCustomName('');
       setShowCustom(false);
+    } catch (err) {
+      showToast(err.message || 'could not add habit — try again');
     } finally {
       setAdding(null);
     }
